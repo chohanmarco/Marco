@@ -265,9 +265,11 @@ class AccountCustomReport(models.TransientModel):
         workbook.set_colour_RGB(0x15,205,205,205)  
 
         worksheet = workbook.add_sheet("General Ledger", cell_overwrite_ok=True)
-
+        worksheet.show_grid = False
         styleheader = xlwt.easyxf('font: bold 1, colour black, height 300;')
         stylecolumnheader = xlwt.easyxf('font: bold 1, colour white, height 200;pattern: pattern solid, fore_colour custom_colour')
+        linedata = xlwt.easyxf('borders: top_color black, bottom_color black, right_color black, left_color black,\
+                              left thin, right thin, top thin, bottom thin;')
         stylecolaccount = xlwt.easyxf('font: bold 1, colour white, height 200; \
                                       pattern: pattern solid, fore_colour dark_blue; \
                                       align: vert centre, horiz centre; \
@@ -280,10 +282,20 @@ class AccountCustomReport(models.TransientModel):
                               left thin, right thin, top thin, bottom thin;')
         general = xlwt.easyxf('font: bold 1, colour black, height 210;')
         dateheader = xlwt.easyxf('font: bold 1, colour black, height 200;')
-        finaltotalheader = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour black; align: horiz right')
-        rightfont = xlwt.easyxf('pattern: fore_color white; font: color black; align: horiz right')
-        floatstyle = xlwt.easyxf("", "#,###.00")
-        finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black;", "#,###.00")
+        maintotal = xlwt.easyxf('font: bold 1, colour black, height 200; \
+                borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        finaltotalheader = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour black; align: horiz right; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        rightfont = xlwt.easyxf('pattern: fore_color white; font: color black; align: horiz right; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        floatstyle = xlwt.easyxf("borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;", "#,###.00")
+        finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;", "#,###.00")
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 22
         first_col = worksheet.col(1)
@@ -354,9 +366,9 @@ class AccountCustomReport(models.TransientModel):
                 row+=1
                 totaldebit+= line.get('debit')
                 totalcredit+= line.get('credit')
-                worksheet.write(row, 0, line.get('date',False))
-                worksheet.write(row, 1, line.get('move',''))
-                worksheet.write(row, 2, line.get('name',''))
+                worksheet.write(row, 0, line.get('date',False),linedata)
+                worksheet.write(row, 1, line.get('move',''),linedata)
+                worksheet.write(row, 2, line.get('name',''),linedata)
                 if line.get('debit',0.0) == 0.0:
                     worksheet.write(row, 3, 0.0,rightfont)
                 else:
@@ -391,7 +403,7 @@ class AccountCustomReport(models.TransientModel):
                                         keylocation: v or 0.0,
                                                     })
             row+=1
-            worksheet.write_merge(row, row, 0, 2, 'Subtotal '+ '(' + str(ac) +')',dateheader)
+            worksheet.write_merge(row, row, 0, 2, 'Subtotal '+ '(' + str(ac) +')',maintotal)
             if subtotal_debit == 0.0:
                 worksheet.write(row, 3, 0.0,finaltotalheader)
             else:
@@ -420,7 +432,7 @@ class AccountCustomReport(models.TransientModel):
                     FinalDict.update({newkey:newval})
 
             row += 1
-            worksheet.write_merge(row, row, 0, 2, 'REPORT TOTAL', style = dateheader)
+            worksheet.write_merge(row, row, 0, 2, 'REPORT TOTAL', style = maintotal)
             if totaldebit == 0.0:
                 worksheet.write(row, 3, 0.0,finaltotalheader)
             else:
