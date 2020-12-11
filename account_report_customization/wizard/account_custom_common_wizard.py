@@ -29,6 +29,7 @@ class AccountCustomReport(models.TransientModel):
     dimension_wise_project = fields.Boolean(string= 'Dimension Wise Project', default=False)
     dimensions = fields.Selection([('project', 'Project')],string='Dimension',default='project')
     detail_report = fields.Boolean(string= 'Show Detail Report(Accounting)', default=False)
+    analytic_account_ids = fields.Many2many('account.analytic.account', string='Analytic Accounts')
 
 
     def action_redirect_to_aml_view(self):
@@ -104,13 +105,6 @@ class AccountCustomReport(models.TransientModel):
                                 'balance': Balance or 0.0,
                                 }
                         mainDict[Account.name or '-'].append(Vals)
-#                         if self.dimension_wise_project:
-#                             for analytic in DynamicList:
-#                                 if ml.analytic_account_id.name == analytic:
-#                                     AnalyticVals.append({analytic:ml.debit-ml.credit or 0.0})
-#                                 else:
-#                                     AnalyticVals.append({analytic:0.0})
-#                         Vals.update({'analytic_vals':AnalyticVals})
                     else:
                         Vals = {'date': str(ml.date.strftime('%d/%b/%Y')) or '',
                                 'move': ml.move_id and ml.move_id.name or '',
@@ -120,14 +114,6 @@ class AccountCustomReport(models.TransientModel):
                                 'balance': Balance or 0.0,
                                 }
                         mainDict[Account.name or '-'].append(Vals)
-#                         if self.dimension_wise_project:
-#                             for analytic in DynamicList:
-#                                 if ml.analytic_account_id.name == analytic:
-#                                     bala = ml.debit-ml.credit
-#                                     AnalyticVals.append({analytic:ml.debit-ml.credit or 0.0})
-#                                 else:
-#                                     AnalyticVals.append({analytic:0.0})
-#                         Vals.update({'analytic_vals':AnalyticVals})
             if self.account_without_transaction and not MoveLines:
                 AnalyticVals = []
                 Vals = {'date':False,
@@ -138,22 +124,25 @@ class AccountCustomReport(models.TransientModel):
                         'balance':0.0,
                       }
                 mainDict[Account.name or '-'].append(Vals)
-#                 if self.dimension_wise_project:
-#                     for analytic in DynamicList:
-#                         AnalyticVals.append({analytic:0.0})
-#                 Vals.update({'analytic_vals':AnalyticVals})
         return mainDict
 
     @api.model
     def default_get(self, fields):
         vals = super(AccountCustomReport, self).default_get(fields)
         ac_ids = self.env['account.account'].search([])
+        analytic_ids = self.env['account.analytic.account'].search([])
         self.env.cr.execute('update account_account set temp_for_report=False')
+        self.env.cr.execute('update account_analytic_account set temp_analytic_report=False')
         if 'account_ids' in fields and not vals.get('account_ids') and ac_ids:
             iids = []
             for ac_id in ac_ids:
                 iids.append(ac_id.id)
             vals['account_ids'] = [(6, 0, iids)]
+        if 'analytic_account_ids' in fields and not vals.get('analytic_account_ids') and analytic_ids:
+            aniids = []
+            for ana_ac in analytic_ids:
+                aniids.append(ana_ac.id)
+            vals['analytic_account_ids'] = [(6, 0, aniids)]
         return vals
 
 
@@ -174,7 +163,14 @@ class AccountCustomReport(models.TransientModel):
         Status = ['posted']
         Projectwise = self.dimension_wise_project
         MoveLines = []
-        DynamicList = [analytic_account.name for analytic_account in self.env['account.analytic.account'].search([])]
+
+        AllAnalyticAccounts = self.analytic_account_ids
+        FilteredAnalyticAccountIds = AllAnalyticAccounts.filtered(lambda a: a.temp_analytic_report)
+        AnalyticAccountIds = FilteredAnalyticAccountIds
+        if not AnalyticAccountIds:
+            AnalyticAccountIds = AllAnalyticAccounts
+
+        DynamicList = [analytic_account.name for analytic_account in AnalyticAccountIds]
         for Account in self.env['account.account'].browse(AccountIds):
             Balance = 0.0
             self.env.cr.execute("""
@@ -341,7 +337,7 @@ class AccountCustomReport(models.TransientModel):
         calc = 5
         if self.dimension_wise_project:
             col = 6
-            for analytic in analytic_account_ids:
+            for analytic in AnalyticAccountIds:
                 dictval = {analytic.name:col}
                 ColIndexes.update(dictval)
                 dyna_col = worksheet.col(col)

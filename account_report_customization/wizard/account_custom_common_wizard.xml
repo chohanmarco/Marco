@@ -10,18 +10,16 @@
                     <group col="4">
                         <field name="date_from" required="1"/>
                         <field name="date_to" required="1"/>
-                        <!-- <field name="account_ids" required="1"
-                               widget="many2many_tags" options="{'no_create': True}"/> -->
                     </group>
                     <group>
 	                    <group string="Accounts">
 	  						<field name="account_ids"
 	                               nolabel="1">
 	                            <tree editable="top" string="Accounts"
-	                                  create="false" delete="false" edit="false">
+	                                  create="false" delete="false">
+	                                <field name="temp_for_report"/>
 	                                <field name="code" readonly="1"/>
 	                                <field name="name" readonly="1"/>
-	                                <field name="temp_for_report"/>
 	                            </tree>
 	                        </field>
 	                    </group>
@@ -31,6 +29,14 @@
 							<field name="account_without_transaction"/>
 	                        <field name="dimension_wise_project"/>
 	                        <field name="dimensions" attrs="{'required': [('dimension_wise_project','=',True)],'invisible': [('dimension_wise_project','=',False)]}"/>
+	  						<field name="analytic_account_ids" attrs="{'invisible': [('dimension_wise_project','=',False)]}"
+	                               nolabel="1">
+	                            <tree editable="top" string="Projects"
+	                                  create="false" delete="false">
+	                                <field name="temp_analytic_report"/>
+	                                <field name="name" readonly="1"/>
+	                            </tree>
+	                        </field>
 	                    </group>
 					</group>
 

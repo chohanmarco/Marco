@@ -9,21 +9,11 @@
                 <table class="table table-condensed">
                     <thead>
                         <tr>
-                            <th><strong>Start Date</strong></th>
-                            <th><strong>End Date</strong></th>
+                         	<th><strong>From: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_from'),'%Y-%m-%d'))"/> </strong>
+                        	&#160;<strong> To: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_to'),'%Y-%m-%d'))"/></strong></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <strong>From: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_from'),'%Y-%m-%d'))"/>
-                            	</strong>
-                            </td>
-                            <td>
-                                <strong>To: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_to'),'%Y-%m-%d'))"/>
-                            	</strong>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
                 <t t-if="stockData">
@@ -31,12 +21,12 @@
                         <br/>
                         <thead>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Voucher Date</strong></th>
-                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Voucher No</strong></th>
-                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Remarks</strong></th>
-                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Debit</strong></th>
-                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Credit</strong></th>
-                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Balance</strong></th>
+                                <th style="font-size:16px;width: 80px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Voucher Date</strong></th>
+                                <th style="font-size:16px;width: 150px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Voucher No</strong></th>
+                                <th style="font-size:16px;width: 450px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Remarks</strong></th>
+                                <th style="font-size:16px;width: 120px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Debit</strong></th>
+                                <th style="font-size:16px;width: 120px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Credit</strong></th>
+                                <th style="font-size:16px;width: 120px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Balance</strong></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -53,22 +43,22 @@
                                     <t t-set="totalcredit" t-value="totalcredit+val.get('credit')" />
                                     <t t-set="finaldebit" t-value="finaldebit+val.get('debit')" />
                                     <t t-set="finalcredit" t-value="finalcredit+val.get('credit')" />
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('date')"/>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('move')"/>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('name')"/>
                                     </td>
-                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('debit')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
-                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('credit')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
-                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
 	                                <!--tr t-foreach="val.get(analytic_vals)" t-as="analytic" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
