@@ -41,19 +41,26 @@ class AccountCustomReport(models.TransientModel):
         AccountIds = FilteredAccountIds.ids
         if not AccountIds:
             AccountIds = AllAccounts.ids
+
+        AllAnalyticAccounts = self.analytic_account_ids
+        FilteredAnalyticAccountIds = AllAnalyticAccounts.filtered(lambda a: a.temp_analytic_report)
+        AnalyticAccountIds = FilteredAnalyticAccountIds.ids
+        if not AnalyticAccountIds:
+            AnalyticAccountIds = AllAnalyticAccounts.ids
+            
         Status = ['posted']
         MoveLines = []
-        if AccountIds:
-            self.env.cr.execute("""
-                SELECT aml.id
-                FROM account_move_line aml
-                LEFT JOIN account_move am ON (am.id=aml.move_id)
-                WHERE (aml.date >= %s) AND
-                    (aml.date <= %s) AND
-                    (aml.account_id in %s) AND
-                    (am.state in %s) ORDER BY aml.date""",
-                (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple(AccountIds), tuple(Status),))
-            MoveLines = [x[0] for x in self.env.cr.fetchall()]
+        self.env.cr.execute("""
+            SELECT aml.id
+            FROM account_move_line aml
+            LEFT JOIN account_move am ON (am.id=aml.move_id)
+            WHERE (aml.date >= %s) AND
+                (aml.date <= %s) AND
+                (aml.account_id in %s) AND
+                (aml.analytic_account_id in %s) AND
+                (am.state in %s) ORDER BY aml.date""",
+            (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple(AccountIds), tuple(AnalyticAccountIds), tuple(Status),))
+        MoveLines = [x[0] for x in self.env.cr.fetchall()]
         action['context'] = {'create': False}
         action['domain'] = [('id', 'in', MoveLines)]
         return action   
