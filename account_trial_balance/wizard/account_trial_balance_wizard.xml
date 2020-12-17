@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="account_trial_balance_report_view" model="ir.ui.view">
+            <field name="name">Account Trial Balance Wizard</field>
+            <field name="model">account.trial.balance.report</field>
+            <field name="arch" type="xml">
+                <form string="Report Options">
+                    <group col="4">
+                        <field name="date_from" required="1"/>
+                        <field name="date_to" required="1"/>
+                        <!-- <field name="account_ids" required="1"
+                               widget="many2many_tags" options="{'no_create': True}"/> -->
+                    </group>
+                    <group>
+	                    <group string="Accounts">
+	  						<field name="account_ids"
+	                               nolabel="1">
+	                            <tree editable="top" string="Accounts"
+	                                  create="false" delete="false" edit="false">
+	                                <field name="temp_for_report"/>
+	                                <field name="code" readonly="1"/>
+	                                <field name="name" readonly="1"/>
+	                            </tree>
+	                        </field>
+	                    </group>
+	                    <group string="Other Filters">
+	                        <field name="account_zero_closing_balance" invisible="1"/>
+	                        <field name="show_dr_cr_separately"/>
+							<field name="account_without_transaction"/>
+	                        <field name="dimension_wise_project"/>
+	                        <field name="projectwise" attrs="{'required': [('dimension_wise_project','=','dimension')],'invisible': [('dimension_wise_project','!=','dimension')]}"/>
+	  						<field name="analytic_account_ids" attrs="{'invisible': [('dimension_wise_project','!=','dimension')]}"
+	                               nolabel="1">
+	                            <tree editable="top" string="Projects"
+	                                  create="false" delete="false">
+	                                <field name="temp_analytic_report"/>
+	                                <field name="name" readonly="1"/>
+	                            </tree>
+	                        </field>
+	                    </group>
+					</group>
+
+                    <footer>
+                        <button name="print_report_trial_balance" string="Print PDF" type="object" default_focus="1" class="oe_highlight" />
+                        <button name="trial_balance_export_excel" string="Export Excel" type="object"
+                                default_focus="1" class="oe_highlight"/>
+                        <!--button name="action_redirect_to_aml_view" type="object" string="Open View"
+                        		default_focus="1" class="oe_highlight"/-->
+                        <button string="Cancel" class="btn btn-default" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_account_trial_balance_report" model="ir.actions.act_window">
+            <field name="name">Trial Balance</field>
+            <field name="res_model">account.trial.balance.report</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem name="Trial Balance" id="trial_balance_custom_menu"
+            action="account_trial_balance.action_account_trial_balance_report"
+            parent="account_report_customization.menu_custom_reporting"
+            sequence="2"/>
+
+        <record id="view_trial_balance_export_excel_form" model="ir.ui.view">
+            <field name="name">Trial Balance Excel Form</field>
+            <field name="model">trial.balance.excel</field>
+            <field name="arch" type="xml">
+                <form string="Excel Report file">
+                    <group>
+                        <field name="excel_file" readonly="1" filename="file_name"/>
+                        <field name="file_name" invisible="1"/>
+                    </group>
+                    <footer></footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_trial_balance_export_excel" model="ir.actions.act_window">
+            <field name="name">Trial Balance Excel Report </field>
+            <field name="view_id" ref="view_trial_balance_export_excel_form"/>
+            <field name="view_mode">form</field>
+            <field name="res_model">trial.balance.excel</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>

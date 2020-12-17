@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_trial_balance">
+        <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h3 class="text-center">Trial Balance</h3>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                         	<th><strong>From: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_from'),'%Y-%m-%d'))"/> </strong>
+                        	&#160;<strong> To: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_to'),'%Y-%m-%d'))"/></strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <t t-if="stockData">
+                    <table class="table table-condensed" style="border:solid 1px;">
+                        <br/>
+                        <thead>
+                        	<t t-if="data['form'].get('show_dr_cr_separately')">
+	                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Code</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Name</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Op.Debit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Op.Credit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Tr.Debit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Tr.Credit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Closing Debit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Closing Credit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Net Balance</strong></th>
+	                            </tr>
+							</t>
+                        	<t t-if="not data['form'].get('show_dr_cr_separately')">
+	                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Code</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Name</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Tr.Debit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Tr.Credit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Closing Debit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Closing Credit</strong></th>
+	                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Net Balance</strong></th>
+	                            </tr>
+							</t>
+                        </thead>
+                        <tbody>
+                            <t t-set="finalopeningdebit" t-value="0"/>
+                            <t t-set="finalopeningcredit" t-value="0"/>   
+                            <t t-set="finaltrdebit" t-value="0"/>
+                            <t t-set="finaltrcredit" t-value="0"/>  
+                            <t t-set="finalclosingdebit" t-value="0"/>
+                            <t t-set="finalclosingcredit" t-value="0"/>
+                            <t t-set="finalnetbalance" t-value="0"/>
+                            <t t-foreach="stockData" t-as="sd" style="border-bottom:solid 1px;">
+	                        	<t t-if="data['form'].get('show_dr_cr_separately')">
+	                                <tr t-foreach="stockData.get(sd)" t-as="val" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                    <t t-set="finalopeningdebit" t-value="finalopeningdebit+val.get('openingdr')" />
+	                                    <t t-set="finalopeningcredit" t-value="finalopeningcredit+val.get('openingcr')" />
+	                                    <t t-set="finaltrdebit" t-value="finaltrdebit+val.get('trdebit')" />
+	                                    <t t-set="finaltrcredit" t-value="finaltrcredit+val.get('trcredit')" />
+	                                    <t t-set="finalclosingdebit" t-value="finalclosingdebit+val.get('closingdr')" />
+	                                    <t t-set="finalclosingcredit" t-value="finalclosingcredit+val.get('closingcr')" />
+	                                    <t t-set="finalnetbalance" t-value="finalnetbalance+val.get('closingcr')" />
+	                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('acccode')"/>
+	                                    </td>
+	                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('accname')"/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('openingdr')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('openingcr')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('trdebit')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('trcredit')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('closingdr')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('closingcr')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('netbalance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                </tr>
+								</t>
+	                        	<t t-if="not data['form'].get('show_dr_cr_separately')">
+	                                <tr t-foreach="stockData.get(sd)" t-as="val" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                    <t t-set="finaltrdebit" t-value="finaltrdebit+val.get('trdebit')" />
+	                                    <t t-set="finaltrcredit" t-value="finaltrcredit+val.get('trcredit')" />
+	                                    <t t-set="finalclosingdebit" t-value="finalclosingdebit+val.get('closingdr')" />
+	                                    <t t-set="finalclosingcredit" t-value="finalclosingcredit+val.get('closingcr')" />
+	                                    <t t-set="finalnetbalance" t-value="finalnetbalance+val.get('closingcr')" />
+	                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('acccode')"/>
+	                                    </td>
+	                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('accname')"/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('trdebit')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('trcredit')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('closingdr')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('closingcr')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        <span t-esc="val.get('netbalance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+	                                    </td>
+	                                </tr>
+								</t>
+                            </t>
+                            <t>
+                        	<t t-if="data['form'].get('show_dr_cr_separately')">
+							<tr style="border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>REPORT TOTAL</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span/>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalopeningdebit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalopeningcredit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finaltrdebit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>  
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finaltrcredit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalclosingdebit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalclosingcredit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalnetbalance" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>                                                                                                                                                                               
+	                            </tr>
+	                            </t>
+                        	<t t-if="not data['form'].get('show_dr_cr_separately')">
+							<tr style="border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>REPORT TOTAL</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span/>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finaltrdebit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>  
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finaltrcredit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalclosingdebit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalclosingcredit" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong><span t-esc="finalnetbalance" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                    </td>                                                                                                                                                                               
+	                            </tr>
+	                            </t>
+                                </t>       
+                            <br/>
+                        </tbody>
+                    </table>
+                </t>
+            </div>
+        </t>
+        </t>
+    </template>
+
+
+    <report
+        id="action_report_trial_balance"
+        string="Trial Balance"
+        model="account.move.line"
+        report_type="qweb-pdf"
+        file="account_trial_balance.report_trial_balance"
+        name="account_trial_balance.report_trial_balance"
+        menu="False"
+        paperformat="account_report_customization.paperformat_general_ledger_pdf"/>
+
+</odoo>
