@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <template id="web.external_layout_standard">
+        <div t-attf-class="header o_company_#{company.id}_layout"
+            style="margin-left: 585px;">
+            <div class="row">
+                <div class="col-3 mb4 text-right">
+                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px;" alt="Logo"/>
+                </div>
+                <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/>
+            </div>
+        </div>
+
+        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <div class="text-center">
+                <strong class="mr16" style="font-size:24px;">Tax Invoice</strong>
+                <p style="font-weight: bold;">فاتورة ضريبية</p>
+            </div>
+            <div style="max-width:900px;">
+                <div class="text-left" style="display: inline-block;min-width:311px;">
+                    <strong>VAT Registration No :&#160;</strong>
+                    <t t-if="o.partner_id.vat">
+                        <span t-field="o.partner_id.vat" style="font-weight: bold;"></span>
+                    </t>
+                    <p style="font-weight: bold;">رقم سجل ضريبة القيمة المضافة</p>
+                </div>
+                <div class="text-center"
+                    style="display: inline-block;
+                    position:fixed;margin-left:160px;">
+                    <table style="width:400px;max-height:30px;
+                        table-layout: fixed;border:1px solid black;">
+                        <tr style="background-color: rgb(217,217,217);">
+                            <td style="border:1px solid black;">
+                                <strong> Invoice No</strong><br/>
+                                <strong> رقم الفاتورة</strong>
+                            </td>
+                            <td style="border:1px solid black;">
+                                <strong> Date</strong><br/>
+                                <strong> التاريخ</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;">
+                                <span t-field="o.name"/>
+                            </td>
+                            <td style="border:1px solid black;">
+                                <span t-esc="o.invoice_date.strftime('%B, %dth %Y')"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <br/><br/>
+            <div class="left" style="font-weight:bold;">
+                <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
+            </div>
+            <div class="text-left" style="min-width:311px;">
+                <strong>Purchase Order No :&#160;</strong>
+                <t t-if="o.purchase_order_number">
+                    <span t-field="o.purchase_order_number" style="font-weight: bold;"></span>
+                </t>
+                <p style="font-weight: bold;">رقم طلب الشراء</p>
+            </div>
+            <div class="text-left" style="min-width:311px;">
+                <strong>Project Name :&#160;</strong>
+                <t t-if="o.projectname">
+                    <span t-field="o.projectname" style="font-weight: bold;"></span>
+                </t>
+                <p style="font-weight: bold;">اسم المشروع</p>
+            </div>
+            <div class="text-left" style="min-width:311px;">
+                <t t-if="o.notes">
+                    <span t-field="o.notes"></span>
+                </t>
+            </div>
+            <t t-call="web.address_layout"/>
+            <t t-raw="0"/>
+        </div>
+
+        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+            <div class="text-center" style="border-top: 1px solid black;font-size:12px;">
+                <ul class="list-inline mb4">
+                    <p>مركز الدهناء الدور الثاني – 6634 شارع الأحساء، الزهراء – ص.ب 3130 – الرياض 12815، المملكة العربية السعودية – س.ت 1010428213– هاتف 00966112912250</p>
+                </ul>
+                <ul class="list-inline mb4">
+                    <!-- using the list-inline-item class from bootstrap causes weird behaviours in pdf report
+                         adding d-inline class fixes the problem-->
+                    <li t-if="company.street" class="list-inline-item d-inline">
+                        <span t-field="company.street"/> -
+                    </li>
+                    <li t-if="company.street2" class="list-inline-item d-inline">
+                        <span t-field="company.street2"/> -
+                    </li>
+                    <li t-if="company.city" class="list-inline-item d-inline">
+                        <span t-field="company.city"/>
+                    </li>
+                    <li t-if="company.state_id" class="list-inline-item d-inline">
+                        <span t-field="company.state_id"/>
+                        <span t-field="company.zip"/>, 
+                    </li>
+                    <li t-if="company.country_id" class="list-inline-item d-inline">
+                        <span t-field="company.country_id"/> -
+                    </li>
+                    <li t-if="company.vat" class="list-inline-item d-inline"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>  <span t-field="company.vat"/> - </li>
+                    <li t-if="company.phone" class="list-inline-item d-inline">Tel <span class="o_force_ltr" t-field="company.phone"/></li>
+                </ul>
+
+                <div name="financial_infos">
+                    <span t-field="company.report_footer"/>
+                </div>
+
+            </div>
+        </div>
+    </template>
+
+        <template id="report_invoice_custom_document_marco">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <div class="page">
+                    <br/>
+                    <table style="width:900px;border:1px solid black;">
+                        <tr class="text-center" style="background-color: rgb(217,217,217);">
+                            <td style="width:400px;border:1px solid black;">
+                                <strong>Description</strong><br/>
+                                <strong>الوصف</strong>
+                            </td>
+                            <td style="border:1px solid black;">
+                                <strong>Price</strong><br/>
+                                <strong>السعر</strong>
+                            </td>
+                            <td style="border:1px solid black;">
+                                <strong>VAT</strong><br/>
+                                <strong>ضريبة القيمة المضافة</strong>
+                            </td>
+                            <td style="border:1px solid black;">
+                                <strong>Net Price</strong><br/>
+                                <strong>السعر الصافي</strong>
+                            </td>
+                        </tr>
+                        <t t-set="taxsubtotal" t-value="0" /> 
+                        <tr t-foreach="o.invoice_line_ids" t-as="line">
+                            <t t-set="taxamount" t-value="line.price_total - line.price_subtotal"/>
+                            <t t-set="taxsubtotal" t-value="taxsubtotal+taxamount" />
+                            <td style="border:1px solid black;">
+                                <span t-field="line.name"/>
+                            </td>
+                            <td style="border:1px solid black;text-align: center;">
+                                <span t-field="line.price_unit"/>
+                            </td>
+                            <td style="border:1px solid black;text-align: center;">
+                                <span t-esc="line.price_total - line.price_subtotal" t-options='{"widget": "float", "precision": decimal_precision}'></span>
+                            </td>
+                            <td style="border:1px solid black;text-align: center;">
+                                <span t-field="line.price_total"/>
+                            </td>
+                        </tr>
+                        <tr class="text-center" style="background-color: rgb(217,217,217);">
+                            <td style="border:1px solid black; width:400px;">
+                                <strong>Total</strong><br/>
+                                <strong>المجموع )ريال سعودي(</strong>
+                            </td>
+                            <td style="border:1px solid black;width:200px;">
+                                <strong t-field="o.amount_untaxed"/>
+                            </td>
+                            <td style="border:1px solid black;width:200px;">
+                                <strong><span t-esc="taxsubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                            </td>
+                            <td style="border:1px solid black;width:200px;">
+                                <strong t-field="o.amount_total"/>
+                            </td>
+                        </tr>
+                        <tr style="width:1000px;background-color: rgb(217,217,217);">
+                            <td style="width:1000px;"><span t-esc="o.currency_id.amount_to_text(o.amount_total)"></span></td>
+                            <td><span></span></td>
+                            <td><span></span></td>
+                            <td><span></span></td>
+                        </tr>
+                    </table>
+
+                    <br/>
+                    <p>
+                        <strong>Payment to be settled through bank transfer through below details:&#160;</strong>
+                    </p>
+                    <div>
+                        <div style="display:inline-block;">
+                            <table style="table-layout: fixed;">
+                                <tr>
+                                    <td class="text-left"
+                                        style="min-width:200px;">
+                                        <span>Account Name:</span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.bank_account_id.partner_id"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="min-width:200px;">
+                                        <span>Bank Name:</span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.bank_account_id.bank_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="min-width:200px;">
+                                        <span>Account Number:</span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.bank_account_id.acc_number"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="min-width:200px;">
+                                        <span>IBAN No:</span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.bank_account_id.bank_id.bic"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="min-width:200px;">
+                                        <span>Currency:</span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.bank_account_id.company_id.currency_id"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+     					<div style="display: inline-block;margin-left:130px;">
+                            <strong style="font-size:20px;">Jeal AlMustaqbal Investment Co</strong><br/>
+                            <p style="font-weight: bold;">شركة جيل المستقبل للاستثمار</p><br/>
+                            <img style="width:170px;heigh:170px;" t-if="o.company_id.stamp" class="rounded-circle mt-1 o_portal_contact_img" t-att-src="image_data_uri(o.company_id.stamp)" alt="Contact"/>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </template>
+
+        <template id="report_invoice_marco">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.invoice_user_id.sudo().lang if o.type in ('in_invoice', 'in_refund') else o.partner_id.lang"/>
+                    <t t-call="invoice_pdf_report.report_invoice_custom_document_marco" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+
+        <record id="paperformat_marco_invoice" model="report.paperformat">
+            <field name="name">Marco Invoice</field>
+            <field name="default" eval="True"/>
+            <field name="format">custom</field>
+            <field name="page_height">297</field>
+            <field name="page_width">210</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">30</field>
+            <field name="margin_bottom">23</field>
+            <field name="margin_left">5</field>
+            <field name="margin_right">5</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">22</field>
+            <field name="dpi">90</field>
+        </record>
+
+        <report
+            id="account_invoices_without_payment"
+            model="account.move"
+            string="Marco Invoice"
+            report_type="qweb-pdf"
+            name="invoice_pdf_report.report_invoice_marco"
+            file="invoice_pdf_report.report_invoice_marco"
+            attachment="(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')"
+            print_report_name="(object._get_report_base_filename())"
+            paperformat="invoice_pdf_report.paperformat_marco_invoice"
+        />
+
+    </data>
+</odoo>

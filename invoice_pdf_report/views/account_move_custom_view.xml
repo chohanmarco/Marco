@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="account_move_custom_form_view_for_report" model="ir.ui.view">
+            <field name="name">account.move.custom</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <field name="ref" position="after">
+                    <field name="purchase_order_number"/>
+                    <field name="projectname"/>
+                    <field name="bank_account_id"/>
+                </field>
+                <field name="company_id" position="after">
+                    <field name="notes" />
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>
