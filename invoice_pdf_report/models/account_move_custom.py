@@ -17,7 +17,7 @@ class AccountMove(models.Model):
     bank_account_id = fields.Many2one('res.partner.bank',string="Bank Account Number")
     notes = fields.Text(string="Description")
     is_contract =   fields.Boolean(string="For Contract?")
-    contract_order_number = fields.Char(string= 'Contract Order No')
+    contract_order_number = fields.Char(string= 'Contract No')
 
     def amount_to_text(self, amount, currency):
         convert_amount_in_words = self.company_id.currency_id.amount_to_text(amount)

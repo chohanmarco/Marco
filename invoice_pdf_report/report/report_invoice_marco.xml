@@ -15,14 +15,14 @@
 
         <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="text-center">
-                <strong class="mr16" style="font-size:24px;">Tax Invoice</strong>
-                <p style="font-weight: bold;">فاتورةضريبية</p>
+                <strong class="mr16" style="font-size:24px;">Tax Invoice</strong><br/>
+                <strong>فاتورة ضريبية</strong>
             </div>
-            <div style="max-width:900px;">
+            <div style="max-width:900px;padding-top:20px;">
                 <div class="text-left" style="display: inline-block;min-width:311px;margin-left:18px;font-size:15px;">
                     <strong>VAT Registration No :&#160;</strong>
-                    <strong t-esc="310041794200003"></strong>
-                    <p style="font-size:14px;">سجلرضرقميبةالقيمةالمضافة</p>
+                    <strong t-esc="310041794200003"></strong><br/>
+                    <strong style="font-size:11px;">رقم سجل ضريبة القيمة المضافة</strong>
                 </div>
                 <div class="text-center"
                     style="display: inline-block;
@@ -32,7 +32,7 @@
                         <tr style="background-color: rgb(217,217,217);">
                             <td style="border:1px solid black;">
                                 <strong>Invoice No</strong><br/>
-                                <strong>رقمالفاتورة</strong>
+                                <strong>رقم الفاتورة</strong>
                             </td>
                             <td style="border:1px solid black;">
                                 <strong>Date</strong><br/>
@@ -50,7 +50,7 @@
                     </table>
                 </div>
             </div>
-            <div style="font-weight:bold;margin-left:18px;font-size:15px;">
+            <div style="font-weight:bold;margin-left:18px;font-size:15px;padding-top:15px;">
                 <t t-if="o.partner_id.parent_id">
                     <strong t-field="o.partner_id.parent_id.name"/><br/>
                 </t>
@@ -70,23 +70,25 @@
             </div>
             <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:15px;">
                 <t t-if="o.is_contract">
-                    <strong>Contract Order No :&#160;</strong>
-                    <span t-field="o.contract_order_number" style="font-weight: bold;"></span>
+                    <strong>Contract No :&#160;</strong>
+                    <span t-field="o.contract_order_number" style="font-weight: bold;"></span><br/>
+                    <strong>رقم المشروع</strong>
                 </t>
                 <t t-else="">
                     <strong>Purchase Order No :&#160;</strong>
-                    <span t-field="o.purchase_order_number" style="font-weight: bold;"></span>
+                    <span t-field="o.purchase_order_number" style="font-weight: bold;"></span><br/>
+                    <strong>رقم طلب الشراء</strong>
                 </t><br/>
-                <p style="font-size:14px;">رقمطلبالشراء</p>
             </div>
-            <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;">
+            <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:15px;">
                 <strong>Project Name :&#160;</strong>
                 <t t-if="o.projectname">
                     <span t-field="o.projectname" style="font-weight: bold;"></span>
-                </t>
-                <p style="font-size:14px;">اسمالمشروع</p>
+                </t><br/>
+                <strong>اسم المشروع</strong>
             </div>
-            <div class="text-left" style="min-width:311px;margin-left:18px;padding-bottom:10px;font-size:15px;">
+            <div class="text-left"
+                style="min-width:311px;margin-left:18px;padding-top:15px;padding-bottom:10px;font-size:15px;">
                 <t t-if="o.notes">
                     <span t-field="o.notes"></span>
                 </t>
@@ -147,28 +149,28 @@
                             </td>
                             <td style="border:1px solid black;font-size:14px;">
                                 <strong>VAT(15%)</strong><br/>
-                                <strong style="font-size:13px;">ضريبةالقيمةالمضافة</strong>
+                                <strong style="font-size:13px;">ضريبة القيمة المضافة</strong>
                             </td>
                             <td style="border:1px solid black;font-size:14px;">
                                 <strong>Net Price</strong><br/>
-                                <strong style="font-size:13px;">السعرالصافي</strong>
+                                <strong style="font-size:13px;">السعر الصافي</strong>
                             </td>
                         </tr>
                         <t t-set="taxsubtotal" t-value="0" /> 
                         <tr t-foreach="o.invoice_line_ids" t-as="line">
                             <t t-set="taxamount" t-value="line.price_total - line.price_subtotal"/>
                             <t t-set="taxsubtotal" t-value="taxsubtotal+taxamount" />
-                            <td style="border:1px solid black;font-size:14px;padding-left: 10px;padding-bottom:15px;">
+                            <td style="border:1px solid black;font-size:14px;padding-left: 7px;">
                                 <span t-esc="line.name"/>
                             </td>
                             <td style="border:1px solid black;text-align: center;padding-top:10px;">
                                 <span t-field="line.price_unit"/>
                             </td>
                             <td style="border:1px solid black;text-align: center;padding-top:10px;">
-                                <span t-esc="line.price_total - line.price_subtotal" t-options='{"widget": "float", "precision": decimal_precision}'></span>
+                                <span t-esc="line.price_total - line.price_subtotal" t-options='{"widget": "float", "precision": 2}'></span>
                             </td>
                             <td style="border:1px solid black;text-align: center;padding-top:10px;">
-                                <span t-field="line.price_total"/>
+                                <span t-esc="line.price_total" t-options='{"widget": "float", "precision": 2}'/>
                             </td>
                         </tr>
                         <tr class="text-center" style="background-color: rgb(217,217,217);">
@@ -181,7 +183,8 @@
                                 <strong t-field="o.amount_untaxed"/>
                             </td>
                             <td style="border:1px solid black;width:200px;padding-top:10px;">
-                                <strong><span t-esc="taxsubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/></strong>
+                                <strong><span t-esc="taxsubtotal" t-options='{"widget": "float", "precision": 2}'/></strong>
+                                <strong t-esc="o.company_id.currency_id.symbol"/>
                             </td>
                             <td style="border:1px solid black;width:200px;padding-top:10px;">
                                 <strong t-field="o.amount_total"/>
@@ -199,7 +202,7 @@
                     </table>
                 </div>
                 <p style="margin-left:18px;padding-top:12px;">
-                    <strong>Payment to be settled through bank transfer through below details:&#160;</strong>
+                    <strong>Payment to be settled through bank transfer by below details:&#160;</strong>
                 </p>
                 <div style="margin-left:18px;">
                     <div style="display:inline-block;">
@@ -247,12 +250,12 @@
                             </tr>
                         </table>
                     </div>
-                    <div style="margin-left:500px;">
+                    <div class="text-center" style="margin-left:500px;">
                         <strong style="font-size:20px;">Jeal AlMustaqbal Investment Co</strong><br/>
-                        <span style="font-weight: bold;">شركةجيلالمستقبلللاستثمار</span>
+                        <span style="font-weight: bold;">شركة جيل المستقبل للاستثمار</span>
                     </div>
-                    <div class="text-center">
-                        <img style="width:170px;heigh:170px;" t-if="o.company_id.stamp" class="rounded-circle mt-1 o_portal_contact_img" t-att-src="image_data_uri(o.company_id.stamp)" alt="Contact"/>
+                    <div class="text-center" style="margin-left:500px;">
+                        <img style="width:170px;heigh:170px;text-align:center;" t-if="o.company_id.stamp" class="rounded-circle mt-1 o_portal_contact_img" t-att-src="image_data_uri(o.company_id.stamp)" alt="Contact"/>
                     </div>
                 </div>
             </div>
