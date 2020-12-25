@@ -65,7 +65,7 @@
                     <strong t-field="o.partner_id.vat"></strong>
                 </t>
                 <t t-else="">
-                    <strong>:/</strong>
+                    <strong>/</strong>
                 </t>
             </div>
             <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:15px;">
