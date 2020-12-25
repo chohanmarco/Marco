@@ -158,7 +158,7 @@
                         <tr t-foreach="o.invoice_line_ids" t-as="line">
                             <t t-set="taxamount" t-value="line.price_total - line.price_subtotal"/>
                             <t t-set="taxsubtotal" t-value="taxsubtotal+taxamount" />
-                            <td style="border:1px solid black;font-size:14px;height:60px;padding-left: 10px;">
+                            <td style="border:1px solid black;font-size:14px;padding-left: 10px;padding-bottom:15px;">
                                 <span t-esc="line.name"/>
                             </td>
                             <td style="border:1px solid black;text-align: center;padding-top:10px;">
