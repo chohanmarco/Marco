@@ -20,7 +20,7 @@
                     <field name="notes" />
                 </field>
                 <xpath expr="//sheet/group/group/div" position="before">
-                    <field name="invoice_no"/>
+                    <field name="internal_custom_invoice_no"/>
                 </xpath>
             </field>
         </record>
