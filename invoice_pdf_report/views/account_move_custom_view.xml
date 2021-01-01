@@ -19,9 +19,9 @@
                 <field name="company_id" position="after">
                     <field name="notes" />
                 </field>
-                <field name="partner_id" position="before">
-                	<field name="internal_custom_invoice_no"/>
-            	</field>
+                <xpath expr="//sheet/group/group/div" position="before">
+                    <field name="invoice_no"/>
+                </xpath>
             </field>
         </record>
 
