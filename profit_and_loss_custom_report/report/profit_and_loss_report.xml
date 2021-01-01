@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_profit_loss">
+        <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h3 class="text-center">Profit And Loss</h3>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                         	<th><strong>From: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(form.get('date_from'),'%Y-%m-%d'))"/> </strong>
+                        	&#160;<strong> To: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(form.get('date_to'),'%Y-%m-%d'))"/></strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <t t-if="get_profit_loss">
+                    <table class="table table-condensed" style="border:solid 1px;">
+                        <br/>
+                        <thead>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <th style="font-size:16px;width: 80px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Code</strong></th>
+                                <th style="font-size:16px;width: 150px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Name</strong></th>
+                                <th style="font-size:16px;width: 450px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Balance</strong></th>
+                                <th style="font-size:16px;width: 120px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Percentage</strong></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="grossprofittotal" t-value="0" />
+                            <t t-set="operatingtotal" t-value="0" />
+                            <t t-set="otherincometotal" t-value="0" />
+                            <t t-set="costrevenuetotal" t-value="0" />
+                            <t t-set="expensetotal" t-value="0" />
+                            <t t-set="expensestotal" t-value="0" />
+                            <t t-set="depreciationtotal" t-value="0" />
+                            <t t-set="OpPercentage" t-value="0" />
+                            <t t-set="OinPercentage" t-value="0" />
+                            <t t-set="CorPercentage" t-value="0" />
+                            <t t-set="ExPercentage" t-value="0" />
+                            <t t-set="DepPercentage" t-value="0" />
+                            <t t-set="percentage" t-value="0" />           	
+                            <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Income'">
+                                    <t t-set="operatingtotal" t-value="operatingtotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Cost of Revenue'">
+                                    <t t-set="costrevenuetotal" t-value="costrevenuetotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Other Income'">
+                                    <t t-set="otherincometotal" t-value="otherincometotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Expenses'">
+                                    <t t-set="expensetotal" t-value="expensetotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Depreciation'">
+                                    <t t-set="depreciationtotal" t-value="depreciationtotal+val.get('balance')"/>
+                                </t>
+                                <t t-set="grossprofittotal" t-value="operatingtotal+costrevenuetotal"/>
+                                <t t-set="expensestotal" t-value="expensetotal+depreciationtotal"/>  
+                                <t t-set="netprofit" t-value="grossprofittotal+otherincometotal+expensestotal"/>
+                                <t t-if="grossprofittotal > 0">
+                                    <t t-set="OpPercentage" t-value="(operatingtotal * 100)/ grossprofittotal"/>
+                                    <t t-set="OinPercentage" t-value="(otherincometotal * 100)/ grossprofittotal"/>
+                                    <t t-set="CorPercentage" t-value="(costrevenuetotal * 100)/ grossprofittotal"/>
+                                    <t t-set="ExPercentage" t-value="(expensetotal * 100)/ grossprofittotal"/>  
+                                    <t t-set="DepPercentage" t-value="(depreciationtotal * 100)/ grossprofittotal"/>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Income</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Gross Profit</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <span t-esc="grossprofittotal"/>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"> 
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Operating Income</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <span t-esc="operatingtotal"/>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <span t-esc="OpPercentage"/>
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Income'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('balance')"/>
+                                    </td>
+                                    <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                    </td>
+                                </t>
+                            </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Cost of Revenue</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="costrevenuetotal"/>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="CorPercentage"/>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <t t-if="val['account_type'] == 'Cost of Revenue'">
+                                        <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_code')"/>
+                                        </td>
+                                        <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_name')"/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')"/>
+                                        </td>
+                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <t t-if="grossprofittotal > 0">
+                                                <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                            </t>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"> 
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Other Income</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="otherincometotal"/>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="OinPercentage"/>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <t t-if="val['account_type'] == 'Other Income'">
+                                        <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_code')"/>
+                                        </td>
+                                        <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_name')"/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')"/>
+                                        </td>
+                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Expenses</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Expenses</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="expensetotal"/>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="ExPercentage"/>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <t t-if="val['account_type'] == 'Expenses'">
+                                        <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_code')"/>
+                                        </td>
+                                        <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_name')"/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')"/>
+                                        </td>
+                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Depreciation</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="depreciationtotal"/>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="DepPercentage"/>
+                                    </td>
+                                </tr>
+                                <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <t t-if="val['account_type'] =='Depreciation'">
+                                        <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_code')"/>
+                                        </td>
+                                        <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('account_name')"/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')"/>
+                                        </td>
+                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                          
+                                        <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                        </td>
+                                    </t>
+                                </tr>
+							    <tr style="border-bottom:solid 1px;">
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>NET PROFIT</strong>
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="netprofit" />
+                                    </td>
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                </tr>    
+                            <br/>
+                        </tbody>
+                    </table>
+                </t>
+            </div>
+        </t>
+        </t>
+    </template>
+
+    <record id="paperformat_profit_loss_pdf" model="report.paperformat">
+        <field name="name">Profit And Loss</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">297</field>
+        <field name="page_width">210</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">23</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">9</field>
+        <field name="dpi">110</field>
+    </record>
+
+    <report
+        id="action_report_profit_loss"
+        string="Profit And Loss"
+        model="account.move.line"
+        report_type="qweb-pdf"
+        file="profit_and_loss_custom_report.report_profit_loss"
+        name="profit_and_loss_custom_report.report_profit_loss"
+        menu="False"
+        paperformat="profit_and_loss_custom_report.paperformat_profit_loss_pdf"/>
+
+</odoo>
