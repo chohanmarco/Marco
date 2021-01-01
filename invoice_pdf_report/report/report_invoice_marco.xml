@@ -41,7 +41,7 @@
                         </tr>
                         <tr>
                             <td style="border:1px solid black;">
-                                <span t-field="o.invoice_no"/>
+                                <span t-esc="o.internal_custom_invoice_no"/>
                             </td>
                             <td style="border:1px solid black;">
                                 <span t-esc="o.invoice_date.strftime('%B, %dth %Y')"/>

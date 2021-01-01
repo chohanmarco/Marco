@@ -18,7 +18,7 @@ class AccountMove(models.Model):
     notes = fields.Text(string="Description")
     is_contract =   fields.Boolean(string="For Contract?")
     contract_order_number = fields.Char(string= 'Contract No')
-    invoice_no = fields.Char(string="Invoice No")
+    internal_custom_invoice_no = fields.Char(string="Invoice No")
 
     def amount_to_text(self, amount, currency):
         convert_amount_in_words = self.company_id.currency_id.amount_to_text(amount)
