@@ -88,7 +88,7 @@
                 <strong>اسم المشروع</strong>
             </div>
             <div class="text-left"
-                style="min-width:311px;margin-left:18px;padding-top:10px;padding-bottom:10px;font-size:15px;">
+                style="max-width:810px;margin-left:18px;padding-top:10px;padding-bottom:10px;font-size:15px;">
                 <t t-if="o.notes">
                     <span t-field="o.notes"></span>
                 </t>
