@@ -170,7 +170,7 @@
                                 <span t-esc="line.price_total - line.price_subtotal" t-options='{"widget": "float", "precision": 2}'></span>
                             </td>
                             <td style="border:1px solid black;text-align: center;padding-top:10px;">
-                                <span t-esc="line.price_total"/>
+                                <span t-esc="line.price_total" t-options='{"widget": "float", "precision": 2}'/>
                             </td>
                         </tr>
                         <tr class="text-center" style="background-color: rgb(217,217,217);">
@@ -183,7 +183,7 @@
                                 <strong t-field="o.amount_untaxed"/>
                             </td>
                             <td style="border:1px solid black;width:200px;padding-top:10px;">
-                                <strong><span t-esc="o.amount_tax"/></strong>
+                                <strong><span t-esc="o.amount_tax" t-options='{"widget": "float", "precision": 2}'/></strong>
                                 <strong t-esc="o.company_id.currency_id.symbol"/>
                             </td>
                             <td style="border:1px solid black;width:200px;padding-top:10px;">
