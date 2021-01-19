@@ -26,7 +26,7 @@
                 </div>
                 <div class="text-center"
                     style="display: inline-block;
-                    position:fixed;margin-left:140px;">
+                    position:fixed;margin-left:90px;">
                     <table style="width:400px;max-height:30px;
                         table-layout: fixed;border:1px solid black;">
                         <tr style="background-color: rgb(217,217,217);">
