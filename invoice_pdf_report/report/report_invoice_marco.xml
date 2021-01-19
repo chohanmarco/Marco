@@ -68,7 +68,7 @@
                     <strong>/</strong>
                 </t>
             </div>
-            <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:15px;">
+            <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:10px;">
                 <t t-if="o.is_contract">
                     <strong>Contract No :&#160;</strong>
                     <span t-field="o.contract_order_number" style="font-weight: bold;"></span><br/>
@@ -80,7 +80,7 @@
                     <strong>رقم طلب الشراء</strong>
                 </t><br/>
             </div>
-            <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:15px;">
+            <div class="text-left" style="min-width:311px;margin-left:18px;font-size:15px;padding-top:10px;">
                 <strong>Project Name :&#160;</strong>
                 <t t-if="o.projectname">
                     <span t-field="o.projectname" style="font-weight: bold;"></span>
@@ -88,7 +88,7 @@
                 <strong>اسم المشروع</strong>
             </div>
             <div class="text-left"
-                style="min-width:311px;margin-left:18px;padding-top:15px;padding-bottom:10px;font-size:15px;">
+                style="min-width:311px;margin-left:18px;padding-top:10px;padding-bottom:10px;font-size:15px;">
                 <t t-if="o.notes">
                     <span t-field="o.notes"></span>
                 </t>
@@ -191,7 +191,7 @@
                             </td>
                         </tr>
                         <tr style="background-color: rgb(217,217,217);">
-                            <td colspan="2" style="font-size:14px;padding:10px;">
+                            <td colspan="3" style="font-size:14px;padding:10px;">
                                 <strong>Only</strong>
                                 <strong t-esc="o.amount_to_text(o.amount_total, o.company_id.currency_id)"></strong>
                             </td>
@@ -256,6 +256,9 @@
                     </div>
                     <div class="text-center" style="margin-left:500px;">
                         <img style="width:170px;heigh:170px;text-align:center;" t-if="o.company_id.stamp" class="rounded-circle mt-1 o_portal_contact_img" t-att-src="image_data_uri(o.company_id.stamp)" alt="Contact"/>
+                    </div>
+                    <div class="text-left">
+                        <strong style="font-size:14px;"><u>This is a system generated invoice and does not require any signature</u></strong>
                     </div>
                 </div>
             </div>
