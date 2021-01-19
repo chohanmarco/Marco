@@ -72,7 +72,7 @@
                 <t t-if="o.is_contract">
                     <strong>Contract No :&#160;</strong>
                     <span t-field="o.contract_order_number" style="font-weight: bold;"></span><br/>
-                    <strong>رقم المشروع</strong>
+                    <strong>رقم العقد</strong>
                 </t>
                 <t t-else="">
                     <strong>Purchase Order No :&#160;</strong>
