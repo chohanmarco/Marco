@@ -678,10 +678,10 @@ class AccountTrialBalanceReport(models.TransientModel):
 
         mainheader = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
                                  font: bold 1, colour dark_blue; align: horiz left; borders: top_color black, bottom_color black, right_color black, left_color black,\
-                              left thin, right thin, top thin, bottom thin;')
+                              left thin, right thin, top thin, bottom thin;', "#,###.00")
 
         mainheaders = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz left; borders: top_color black, bottom_color black, right_color black, left_color black,\
-                              left thin, right thin, top thin, bottom thin;')
+                              left thin, right thin, top thin, bottom thin;', "#,###.00")
 
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 20
@@ -847,7 +847,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                             worksheet.write(row, 1 , name, mainheaderdata)
                             col = 2
                             for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
+                                if acc_balance[j]['name'] == 0.0:
+                                    worksheet.write(row, col, "0", mainheaderdata)
+                                else:    
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1),mainheaderdata)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
@@ -886,7 +889,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                             worksheet.write(row, 1 , name, mainheaders)
                             col = 2
                             for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
+                                if acc_balance[j]['name'] == 0.0:
+                                    worksheet.write(row, col, "0", mainheaders)
+                                else:    
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1),mainheaders)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
@@ -929,7 +935,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                             worksheet.write(row, 1, name, mainheaderdata)
                             col = 2
                             for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
+                                if acc_balance[j]['name'] == 0.0:
+                                    worksheet.write(row, col, "0", mainheaderdata)
+                                else:    
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1),mainheaderdata)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
@@ -968,7 +977,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                             worksheet.write(row, 1, name, mainheaders)
                             col = 2
                             for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
+                                if acc_balance[j]['name'] == 0.0:
+                                    worksheet.write(row, col, "0", mainheaders)
+                                else:    
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1),mainheaders)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
@@ -1020,7 +1032,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                         worksheet.write(row, 1 , name, mainheaderdata)
                         col = 2
                         for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
+                            if acc_balance[j]['name'] == 0.0:
+                                worksheet.write(row, col, '0', mainheaderdata)
+                            else:    
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1),mainheaderdata)
                             col+=1
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
@@ -1059,7 +1074,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                         worksheet.write(row, 1 , name, mainheaders)
                         col = 2
                         for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
+                            if acc_balance[j]['name'] == 0.0:
+                                worksheet.write(row, col, '0', mainheaders)
+                            else:    
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaders)
                             col+=1
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
@@ -1102,7 +1120,10 @@ class AccountTrialBalanceReport(models.TransientModel):
                         worksheet.write(row, 1, name, mainheaderdata)
                         col = 2
                         for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
+                            if acc_balance[j]['name'] == 0.0:
+                                worksheet.write(row, col, '0', mainheaderdata)
+                            else:    
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1),mainheaderdata)
                             col+=1
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
@@ -1142,8 +1163,12 @@ class AccountTrialBalanceReport(models.TransientModel):
                         worksheet.write(row, 1, name, mainheaders)
                         col = 2
                         for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
+                            if acc_balance[j]['name'] == 0.0 or acc_balance[j]['name'] == 0:
+                                worksheet.write(row, col, '0', mainheaders)
+                            else:    
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaders)
                             col+=1
+                            
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
                             if self.show_dr_cr_separately:

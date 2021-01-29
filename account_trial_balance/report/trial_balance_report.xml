@@ -55,9 +55,16 @@
 	                                    <span t-esc="val.get('name')"/>
 	                                </td>
 	                                <t t-foreach="val.get('columns')" t-as="s" style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-	                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-	                                        <span t-esc="s.get('name')" t-options='{"widget": "float", "precision": decimal_precision}'/>
-	                                    </td>
+	                                	<t t-if="s.get('name') == '0.0'">
+	                                		<td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        	<span t-esc="0"/>
+	                                    	</td>
+	                                    </t>
+	                                    <t t-if="s.get('name') != '0.0'">
+		                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+		                                        <span t-esc="s.get('name')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+		                                    </td>
+	                                	</t>
 	                                </t>
 	                            </t>
 	                            <t t-if="not val.get('caret_options')">
@@ -68,10 +75,16 @@
 	                                    <span t-esc="val.get('name')"/>
 	                                </td>
 	                                <t t-foreach="val.get('columns')" t-as="s" style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-
-	                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-	                                        <span t-esc="s.get('name')" t-options='{"widget": "float", "precision": decimal_precision}'/>
-	                                    </td>
+	                                	<t t-if="s.get('name') == '0.0'">
+	                                		<td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+	                                        	<span t-esc="0"/>
+	                                    	</td>
+	                                    </t>
+	                                    <t t-if="s.get('name') != '0.0'">
+		                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+		                                        <span t-esc="s.get('name')" t-options='{"widget": "float", "precision": decimal_precision}'/>
+		                                    </td>
+		                                </t>
 	                                </t>
 	                            </t>
                             </tr>
