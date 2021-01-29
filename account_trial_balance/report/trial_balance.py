@@ -18,8 +18,10 @@ class TrialBalanceReport(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
+       
         if not data.get('form'):
             raise UserError(_("Form content is missing, this report cannot be printed."))
+        
         return {
             'stockData': data.get('get_trial_balance'),
             'data': data,

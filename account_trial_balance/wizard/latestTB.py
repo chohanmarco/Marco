@@ -20,7 +20,6 @@ from dateutil.rrule import rrule, MONTHLY
 import calendar
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from odoo.tools.misc import formatLang
 
 
 class AccountTrialBalanceReport(models.TransientModel):
@@ -75,232 +74,132 @@ class AccountTrialBalanceReport(models.TransientModel):
             }
         return self.env.ref('account_trial_balance.action_report_trial_balance').report_action([], data=datas)
 
- 
-    def get_trial_balance_detail(self):
-        """ Details For PDF Report """
-        new_lines = []
-        AccountGroupObj = self.env['account.group']
-        GroupIds = AccountGroupObj.search([])
-        dateFrom = self.date_from
-        dateTo = self.date_to
-        dates = {}
-        AllAnalyticAccounts = self.analytic_account_ids
-        FilteredAnalyticAccountIds = AllAnalyticAccounts.filtered(lambda a: a.temp_analytic_report)
-        AnalyticAccountIds = FilteredAnalyticAccountIds
-        AnalyticNames = []
-        AnalyticIds = []
-        if not AnalyticAccountIds:
-            AnalyticAccountIds = AllAnalyticAccounts
-        if self.dimension_wise_project == 'dimension':
-            AnalyticIds = [analytic_account.id for analytic_account in AnalyticAccountIds]
-            AnalyticNames = [analytic_account.name for analytic_account in AnalyticAccountIds]
-        if self.dimension_wise_project == 'month':
-               dates = {'date_from': dateFrom.strftime('%Y-%m-%d'),'date_to':dateTo.strftime('%Y-%m-%d')}
-        CompanyImage = self.env.company.logo
-        group_list = []
-        option_dict = {}
-        string = dateFrom.strftime('%Y')
-        Status = ['posted']
-        initial_balances = [True]  
-        accounts = []
-        for group_ids in GroupIds:
-            group_list.append(group_ids.name)
-        queries = []
-        option_dict.update({
-                            'unfolded_lines':group_list,
-                            'date':{'string': string,'mode':'range','date_from': dateFrom.strftime('%Y-%m-%d'),'date_to':dateTo.strftime('%Y-%m-%d')},
-                            'analytic_accounts': AnalyticIds,
-                            'analytic_accounts_name':AnalyticNames,
-                            'month_wise_dates': dates,
-                            })
+    # def get_trial_balance_detail(self):
+    #     dateFrom = self.date_from
+    #     dateTo = self.date_to
+    #     AllAccounts = self.account_ids
+    #     FilteredAccountIds = AllAccounts.filtered(lambda a: a.temp_for_report)
+    #     AccountIds = FilteredAccountIds.ids
+    #     if not AccountIds:
+    #         AccountIds = AllAccounts.ids
+    #     Status = ['posted']
+    #     MoveLineIds = []
+    #     mainDict = defaultdict(list)
+    #     DynamicList = [analytic_account.name for analytic_account in self.env['account.analytic.account'].search([])]
+    #     for Account in self.env['account.account'].browse(AccountIds):
+    #         Balance = 0.0
+    #         self.env.cr.execute("""
+    #             SELECT aml.date as date,
+    #                    aml.debit as debit,
+    #                    aml.credit as credit,
+    #                    aml.id as movelineid
+    #             FROM account_move_line aml
+    #             LEFT JOIN account_move am ON (am.id=aml.move_id)
+    #             WHERE (aml.date >= %s) AND
+    #                 (aml.date <= %s) AND
+    #                 (aml.account_id in %s) AND
+    #                 (am.state in %s) ORDER BY aml.date""",
+    #             (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
+    #         MoveLineIds = self.env.cr.fetchall()
 
-        option_list = [option_dict]
+    #         self.env.cr.execute("""
+    #             SELECT sum(aml.debit) as debit,
+    #                    sum(aml.credit) as credit
+    #             FROM account_move_line aml
+    #             LEFT JOIN account_move am ON (am.id=aml.move_id)
+    #             LEFT JOIN account_account aa ON (aa.id=aml.account_id)
+    #             LEFT JOIN account_account_type aat ON (aat.id=aa.user_type_id)
+    #             WHERE (aml.date < %s) AND
+    #                 (aml.account_id = %s) AND
+    #                 (am.state in %s) AND
+    #                 (aml.display_type not in %s)
+    #                 (aat.include_initial_balance is True)""",
+    #             (str(dateFrom) + ' 00:00:00', Account.id, tuple(Status), tuple('line_section','line_note'),))
+    #         OpeningMove = self.env.cr.fetchone()
+            
+    #         OpeningDebit = 0.0
+    #         if OpeningMove[0] is None:
+    #             OpeningDebit = 0.0
+    #         else:
+    #             OpeningDebit = OpeningMove[0]
 
-        query, params = self.get_all_queries(option_list)
-        groupby_accounts = {}
-        groupby_companies = {}
-        groupby_taxes = {}
+    #         OpeningCredit = 0.0
+    #         if OpeningMove[1] is None:
+    #             OpeningCredit = 0.0
+    #         else:
+    #             OpeningCredit = OpeningMove[1]
 
-        self._cr.execute(query, params)
-        for res in self.env.cr.dictfetchall():
+    #         FinalOpeningDebit = 0.0
+    #         FinalOpeningCredit = 0.0
+    #         OpeningBalance = OpeningDebit - OpeningCredit
+    #         if OpeningBalance > 0.0:
+    #             FinalOpeningDebit = OpeningBalance
+    #         elif OpeningBalance < 0.0:
+    #             FinalOpeningCredit = abs(OpeningBalance)
+    #         ClosingDebit = 0.0
+    #         ClosingCredit = 0.0
+    #         NetBalance = 0.0
+    #         if MoveLineIds:
+    #             total_op_debit = 0.0
+    #             total_op_credit = 0.0
+    #             total_tr_debit = 0.0
+    #             total_tr_credit = 0.0
+    #             total_closing_debit = 0.0
+    #             total_closing_credit = 0.0
+    #             total_netbalance = 0.0
+    #             for ml in MoveLineIds:
+    #                 AnalyticVals = []
+    #                 #Balance = Balance + (ml[3] - ml[4])
+    #                 total_tr_debit += ml[1]
+    #                 total_tr_credit += ml[2]
 
-            if res['groupby'] is None:
-                continue
+    #             ClosingBalance = OpeningBalance + (total_tr_debit - total_tr_credit)
+    #             if ClosingBalance > 0.0:
+    #                 ClosingDebit = ClosingBalance or 0.0
+    #             elif ClosingBalance < 0.0:
+    #                 ClosingCredit = abs(ClosingBalance)
+    #             NetBalance = ClosingDebit - ClosingCredit
 
-            i = res['period_number']
-            key = res['key']
-            if key == 'sum':
-                groupby_accounts.setdefault(res['groupby'], [{} for n in range(len(option_list))])
-                groupby_accounts[res['groupby']][i][key] = res
-            elif key == 'initial_balance':
-                groupby_accounts.setdefault(res['groupby'], [{} for n in range(len(option_list))])
-                groupby_accounts[res['groupby']][i][key] = res
-            elif key == 'unaffected_earnings':
-                groupby_companies.setdefault(res['groupby'], [{} for n in range(len(option_list))])
-                groupby_companies[res['groupby']][i] = res
-            elif key == 'dimensionsum':
-                groupby_accounts.setdefault(res['groupby'], [{} for n in range(len(option_list))])
-                groupby_accounts[res['groupby']][i][key] = res
+    #             if self.account_zero_closing_balance and Balance == 0.0:
+    #                 Vals = {'acccode': Account.code or '',
+    #                         'accname': Account.name or '',
+    #                         'openingdr': FinalOpeningDebit,
+    #                         'openingcr': FinalOpeningCredit,
+    #                         'trdebit': total_tr_debit or 0.0,
+    #                         'trcredit': total_tr_credit or 0.0,
+    #                         'closingdr':ClosingDebit or 0.0,
+    #                         'closingcr':ClosingCredit or 0.0,
+    #                         'netbalance': NetBalance or 0.0,
+    #                         }
+    #                 mainDict[Account.name or '-'].append(Vals)
+    #             else:
+    #                 Vals = {'acccode':Account.code or '',
+    #                         'accname': Account.name or '',
+    #                         'openingdr': FinalOpeningDebit,
+    #                         'openingcr': FinalOpeningCredit,
+    #                         'trdebit': total_tr_debit or 0.0,
+    #                         'trcredit': total_tr_credit or 0.0,
+    #                         'closingdr':ClosingDebit or 0.0,
+    #                         'closingcr':ClosingCredit or 0.0,
+    #                         'netbalance': NetBalance or 0.0,
+    #                         }
+    #                 mainDict[Account.name or '-'].append(Vals)
+  
+    #         if self.account_without_transaction and not MoveLineIds:
+    #             AnalyticVals = []
+    #             Vals = {'acccode':Account.code,
+    #                     'accname':Account.name,
+    #                     'openingdr':0.0,
+    #                     'openingcr':0.0,
+    #                     'trdebit': 0.0,
+    #                     'trcredit':0.0,
+    #                     'closingdr':0.0,
+    #                     'closingcr':0.0,
+    #                     'netbalance':0.0,
+    #                     }
+    #             mainDict[Account.name or '-'].append(Vals)
 
-        if groupby_companies:
-            unaffected_earnings_type = self.env.ref('account.data_unaffected_earnings')
-            candidates_accounts = self.env['account.account'].search([
-                ('user_type_id', '=', unaffected_earnings_type.id), ('company_id', 'in', list(groupby_companies.keys()))
-            ])
-            for account in candidates_accounts:
-                company_unaffected_earnings = groupby_companies.get(account.company_id.id)
-                if not company_unaffected_earnings:
-                    continue
-                for i in range(len(option_list)):
-                    unaffected_earnings = company_unaffected_earnings[i]
-                    groupby_accounts.setdefault(account.id, [{} for i in range(len(option_list))])
-                    groupby_accounts[account.id][i]['unaffected_earnings'] = unaffected_earnings
-                del groupby_companies[account.company_id.id]
-
-        AccountIds = []
-        AllAccounts = self.account_ids
-        FilteredAccountIds = AllAccounts.filtered(lambda a: a.temp_for_report)
-        for ids in FilteredAccountIds.ids:
-            ac = [i for i in list(groupby_accounts.keys())]
-            if ids in ac:
-                AccountIds.append(ids)
-        if not AccountIds:
-            for i in AllAccounts:
-                if i.id in list(groupby_accounts.keys()):
-                    AccountIds = [i for i in list(groupby_accounts.keys())]
-        if groupby_accounts:
-            accounts = self.env['account.account'].browse(AccountIds)
-        else:
-            accounts = []
-
-        if groupby_accounts:
-            accounts_results = [(account, groupby_accounts[account.id]) for account in accounts]
-        lines = []
-        totals = [0.0] * (2 * (len(option_list) + 2))
-        for account, periods_results in accounts_results:
-            sums = []
-            account_balance = 0.0
-            for i, period_values in enumerate(reversed(periods_results)):
-                account_sum = period_values.get('sum', {})
-                account_un_earn = period_values.get('unaffected_earnings', {})
-                account_init_bal = period_values.get('initial_balance', {})
-
-                if i == 0:
-                    initial_balance = account_init_bal.get('balance', 0.0) + account_un_earn.get('balance', 0.0)
-                    sums += [
-                        initial_balance > 0 and initial_balance or 0.0,
-                        initial_balance < 0 and -initial_balance or 0.0,
-                    ]
-                    account_balance += initial_balance
-
-                # Append the debit/credit columns.
-                sums += [
-                    account_sum.get('debit', 0.0) - account_init_bal.get('debit', 0.0),
-                    account_sum.get('credit', 0.0) - account_init_bal.get('credit', 0.0),
-                ]
-                account_balance += sums[-2] - sums[-1]
-
-            # Append the totals.
-            sums += [
-                account_balance > 0 and account_balance or 0.0,
-                account_balance < 0 and -account_balance or 0.0,
-            ]
-            # account.account report line.
-            columns = []
-            for i, value in enumerate(sums):
-                # Update totals.
-                totals[i] += value
-
-                # Create columns.
-                columns.append({'name': value, 'class': 'number', 'no_format_name': value})
-
-            name = account.name_get()[0][1]
-            code = name.split()[0]
-            if len(name) > 40 and not self._context.get('print_mode'):
-                name = name[:40]+'...'
-
-            lines.append({
-                'id': account.id,
-                'code': code,
-                'name': name,
-                'title_hover': name,
-                'columns': columns,
-                'unfoldable': False,
-                'caret_options': 'account.account',
-            })
-
-        # Total report line.
-        lines.append({
-             'id': 'grouped_accounts_total',
-             'code': 'group_code',
-             'name': _('Total'),
-             'class': 'total',
-             'columns': [{'name': total, 'class': 'number'} for total in totals],
-             'level': 1,
-        })
-
-        accounts_hierarchy = {}
-        no_group_lines = []
-        for line in lines + [None]:
-           
-            is_grouped_by_account = line and (line.get('caret_options') == 'account.account' or line.get('account_id'))
-            if not is_grouped_by_account or not line:
-                no_group_hierarchy = {}
-                for no_group_line in no_group_lines:
-                    codes = [('root', str(line.get('parent_id')) or 'root') if line else 'root', (self.LEAST_SORT_PRIO, _('(No Group)'))]
-                    if not accounts_hierarchy:
-                        account = self.get_account(no_group_line.get('account_id', no_group_line.get('id')))
-                        codes = [('root', line and str(line.get('parent_id')) or 'root')] + self.get_account_codes(account)
-                    self.add_line_to_hierarchy(no_group_line, codes, no_group_hierarchy, line and line.get('level') or 0 + 1)
-                no_group_lines = []
-               
-                self.deep_merge_dict(no_group_hierarchy, accounts_hierarchy)
-                # Merge the newly created hierarchy with existing lines.
-                if accounts_hierarchy:
-                   
-                    new_lines += self.get_hierarchy_lines(accounts_hierarchy)[1]
-                   
-                    accounts_hierarchy = {}
-
-                if line:
-                    new_lines.append(line)
-
-                continue
-
-            # Exclude lines having no group.
-            account = self.get_account(line.get('account_id', line.get('id')))
-
-            if not account.group_id.id:
-                
-                no_group_lines.append(line)
-                continue
-            codes = [('root', str(line.get('parent_id')) or 'root')] + self.get_account_codes(account)
-            self.add_line_to_hierarchy(line, codes, accounts_hierarchy,line.get('level', 0) + 1)
-
-        net_balance = 0.0
-        for i in range(len(new_lines)):
-            acc_balance = new_lines[i]['columns']
-            listd = [list(c.values())[0] for c in acc_balance]
-            first = listd[4]
-            second = listd[5]
-            net_balance = first - second
-            acc_balance .append({'name':net_balance, 'class': 'number', 'no_format_name':net_balance})
-
-        for i in range(len(new_lines)):
-          if not self.show_dr_cr_separately:
-            new_lines[i]['columns']=new_lines[i]['columns'][2:]
-
-        if self.account_without_transaction :
-            for val in new_lines:
-                v = 0.0 
-                acc_balance = val['columns']
-                for k in acc_balance:
-                    v +=list(k.values())[0]
-
-                if v == 0.0 or v == 0 :
-                    new_lines.remove(val)
-
-        return new_lines
+    #     return mainDict
 
     @api.model
     def default_get(self, fields):
@@ -564,7 +463,6 @@ class AccountTrialBalanceReport(models.TransientModel):
 
                 # Create columns.
                 columns.append({'name': value, 'class': 'number', 'no_format_name': value})
-
             name = account.name_get()[0][1]
             code = name.split()[0]
             if len(name) > 40 and not self._context.get('print_mode'):
@@ -655,33 +553,47 @@ class AccountTrialBalanceReport(models.TransientModel):
         worksheet.show_grid = False
 
         styleheader = xlwt.easyxf('font: bold 1, colour black, height 300;')
-        
+        stylecolumnheader = xlwt.easyxf('font: bold 1, colour white, height 200;pattern: pattern solid, fore_colour custom_colour')
+        linedata = xlwt.easyxf('borders: top_color black, bottom_color black, right_color black, left_color black,\
+                              left thin, right thin, top thin, bottom thin;')
+        grpdata = xlwt.easyxf('pattern: fore_colour white;'
+                          'font: colour dark_blue, bold True;\
+                          borders: top_color black, bottom_color black, right_color black, left_color black,\
+                          left thin, right thin, top thin, bottom thin;')
+        grpdata.pattern.pattern_fore_colour = 20
+
+        grprightfont = xlwt.easyxf('pattern: fore_color white; font: color dark_blue; align: horiz right; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        grpfloatstyle = xlwt.easyxf("pattern: fore_color white; font: color dark_blue;borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;", "#,###.00")
         
         stylecolaccount = xlwt.easyxf('font: bold 1, colour white, height 200; \
                                       pattern: pattern solid, fore_colour dark_blue; \
                                       align: vert centre, horiz centre; \
                                       borders: top_color black, bottom_color black, right_color black, left_color black,\
                               left thin, right thin, top thin, bottom thin;')
-
         analytic_st_col = xlwt.easyxf('font: bold 1, colour black, height 200; \
                                     pattern: pattern solid, fore_colour gainsboro; \
                                     align: vert centre, horiz centre; \
                                     borders: top_color black, bottom_color black, right_color black, left_color black,\
                               left thin, right thin, top thin, bottom thin;')
-
         general = xlwt.easyxf('font: bold 1, colour black, height 210;')
-
         dateheader = xlwt.easyxf('font: bold 1, colour black, height 200;')
-       
-        mainheaderdata = xlwt.easyxf('borders: top_color black, bottom_color black, right_color black, left_color black,\
-                              left thin, right thin, top thin, bottom thin; align: horiz left;', "#,###.00")
-
-        mainheader = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
-                                 font: bold 1, colour dark_blue; align: horiz left; borders: top_color black, bottom_color black, right_color black, left_color black,\
-                              left thin, right thin, top thin, bottom thin;')
-
-        mainheaders = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz left; borders: top_color black, bottom_color black, right_color black, left_color black,\
-                              left thin, right thin, top thin, bottom thin;')
+        maintotal = xlwt.easyxf('font: bold 1, colour black, height 200; \
+                borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        finaltotalheader = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour black; align: horiz right; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        rightfont = xlwt.easyxf('pattern: fore_color white; font: color black; align: horiz right; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;')
+        floatstyle = xlwt.easyxf("borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;", "#,###.00")
+        finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black; \
+        borders: top_color black, bottom_color black, right_color black, left_color black, \
+        left thin, right thin, top thin, bottom thin;", "#,###.00")
 
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 20
@@ -710,6 +622,7 @@ class AccountTrialBalanceReport(models.TransientModel):
         headerstring = 'From :' + str(self.date_from.strftime('%d %b %Y') or '') + ' To :' + str(self.date_to.strftime('%d %b %Y') or '')
         worksheet.write_merge(3, 3, 2, 5, headerstring,dateheader)
         
+        res = []
         dimension_res = ''
         month_res = ''
         if self.dimension_wise_project == 'dimension' :
@@ -724,15 +637,7 @@ class AccountTrialBalanceReport(models.TransientModel):
         calc = 10
         col = 9
         # colc = 4
-        if self.show_dr_cr_separately:
-            calc = 10
-            col = 9
-        else:
-            calc = 8
-            col = 7
-
         if self.dimension_wise_project == 'dimension':
-
             for analytic in AnalyticNames:
                 dictval = {analytic:col}
                 ColIndexes.update(dictval)
@@ -744,7 +649,6 @@ class AccountTrialBalanceReport(models.TransientModel):
                 calc+=1
 
         elif self.dimension_wise_project == 'month':
-
             cur_date = self.date_from
             end = self.date_to
             while cur_date < end:
@@ -759,14 +663,34 @@ class AccountTrialBalanceReport(models.TransientModel):
                 col+=1
                 calc+=1
 
+        # if self.show_dr_cr_separately:
+
+        # ColIndexes = {'Account Code':0,
+        #               'Account Name':1,
+        #               'Op.Debit':2,
+        #               'Op.Credit':3,
+        #               'Tr.Debit':4,
+        #               'Tr.Credit':5,
+        #               'Closing Debit':6,
+        #               'Closing Credit':7,
+        #               'Net Balance':8}
+        # # else:
+        # #     ColIndexes = {'Account Code':0,
+        # #                   'Account Name':1,
+        # #                   'Tr.Debit':2,
+        # #                   'Tr.Credit':3,
+        # #                   'Closing Debit':4,
+        # #                   'Closing Credit':5,
+        # #                   'Net Balance':6} 
+
         worksheet.write(row, 0, 'Account Code', stylecolaccount)
         worksheet.write(row, 1, 'Account Name', stylecolaccount)
         opcol=2
-        if self.show_dr_cr_separately:
-            worksheet.write(row, opcol, 'Op.Debit', stylecolaccount)
-            opcol+=1
-            worksheet.write(row, opcol, 'Op.Credit', stylecolaccount)
-            opcol+=1
+        # if self.show_dr_cr_separately:
+        worksheet.write(row, opcol, 'Op.Debit', stylecolaccount)
+        opcol+=1
+        worksheet.write(row, opcol, 'Op.Credit', stylecolaccount)
+        opcol+=1
         worksheet.write(row, opcol, 'Tr.Debit', stylecolaccount)
         opcol+=1
         worksheet.write(row, opcol, 'Tr.Credit', stylecolaccount)
@@ -783,9 +707,8 @@ class AccountTrialBalanceReport(models.TransientModel):
         Analyticvals = []
         final_list = []
         MonthVals = []
-       
         for analytic in AnalyticNames:
-            Analyticvals.append({analytic:0, 'class': 'number', 'no_format_name':0.0})
+            Analyticvals.append({analytic:0.0,'class': 'number', 'no_format_name':0.0})
 
         fetch_monthwise_data = []
         cur_date = self.date_from
@@ -793,7 +716,7 @@ class AccountTrialBalanceReport(models.TransientModel):
         while cur_date < end:
             cur_date_strf = str(cur_date.strftime('%b %y') or '')
             cur_date += relativedelta(months=1)
-            MonthVals.append({cur_date_strf:0, 'class': 'number', 'no_format_name':0.0})
+            MonthVals.append({cur_date_strf:0.0,'class': 'number', 'no_format_name':0.0})
 
         net_balance = 0.0
         for i in range(len(new_lines)):
@@ -802,9 +725,7 @@ class AccountTrialBalanceReport(models.TransientModel):
             first = listd[4]
             second = listd[5]
             net_balance = first - second
-            acc_balance .append({'name':net_balance, 'class': 'number', 'no_format_name':net_balance})
-
-
+            acc_balance .append({'name':net_balance})
             if self.dimension_wise_project == 'dimension':
                 new_lines[i]['project'] = Analyticvals
             if self.dimension_wise_project == 'month':
@@ -822,360 +743,44 @@ class AccountTrialBalanceReport(models.TransientModel):
                     if month_res[dim]['account_code'] == new_lines[i]['code']:
                         new_lines[i]['month'] = month_res[dim]['columns']
                        
-        if self.account_without_transaction :
-            for i in range(len(new_lines)):
-                v = 0
-                acc_balance = new_lines[i]['columns']
+        for i in range(len(new_lines)):
+            acc_balance = new_lines[i]['columns']
+            name = ''
+            code = ''
+            if not new_lines[i].get('code'):
+                name = new_lines[i]['name']
+                worksheet.write(row, 0,'', linedata)
+                # col+=1
+                worksheet.write(row, 1 , name, linedata)
+                # col+=1
+            else:
+                name = new_lines[i]['name'].replace(new_lines[i]['code'], "")
+                code = new_lines[i]['code']
+                worksheet.write(row, 0,new_lines[i]['code'], linedata)
+                # col+=1
+                worksheet.write(row, 1, name, linedata)
+            col = 2
+            for j in range(len(acc_balance)):
+                worksheet.write(row, col, acc_balance[j]['name'],linedata)
+                col+=1
 
-                for j in acc_balance:
-                    v +=list(j.values())[0]
+            if self.dimension_wise_project == 'dimension':
+                projects = new_lines[i]['project']
+                col = 9
+                for j in range(len(projects)):
+                    worksheet.write(row, col, (list(projects[j].values())[0]),linedata)
+                    col+=1
+                row+=1
 
-                if v == 0:
-                    continue
-                else:
-                    if self.show_dr_cr_separately:
-                        acc_balance = acc_balance
-                    else:
-                        acc_balance = acc_balance[2:]
-                    name = ''
-                    code = ''
-                    if not new_lines[i].get('code'):
-                        name = new_lines[i]['name']
-                        if isinstance(new_lines[i]['id'], int):              
-                            worksheet.write(row, 0,'', mainheaderdata)
-                            # col+=1
-                            worksheet.write(row, 1 , name, mainheaderdata)
-                            col = 2
-                            for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
-                                col+=1
-                            if self.dimension_wise_project == 'dimension':
-                                projects = new_lines[i]['project']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                        col+=1
-                                    row+=1
-                            elif self.dimension_wise_project == 'month':
-                                months = new_lines[i]['month']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                        col+=1
-                                    row+=1
-
-                            else:
-                                row+=1
-                        else:
-                            worksheet.write(row, 0,'', mainheaders)
-                            # col+=1
-                            worksheet.write(row, 1 , name, mainheaders)
-                            col = 2
-                            for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
-                                col+=1
-                            if self.dimension_wise_project == 'dimension':
-                                projects = new_lines[i]['project']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                        col+=1
-                                    row+=1
-                            elif self.dimension_wise_project == 'month':
-                                months = new_lines[i]['month']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                        col+=1
-                                    row+=1
-
-                            else:
-                                row+=1
-
-                    else:
-                        name = new_lines[i]['name'].replace(new_lines[i]['code'], "")
-                        code = new_lines[i]['code']
-                        if isinstance(new_lines[i]['id'], int):
-                            worksheet.write(row, 0,new_lines[i]['code'], mainheaderdata)
-                            # col+=1
-                            worksheet.write(row, 1, name, mainheaderdata)
-                            col = 2
-                            for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
-                                col+=1
-                            if self.dimension_wise_project == 'dimension':
-                                projects = new_lines[i]['project']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                        col+=1
-                                    row+=1
-                            elif self.dimension_wise_project == 'month':
-                                months = new_lines[i]['month']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                        col+=1
-                                    row+=1
-
-                            else:
-                                row+=1
-                        else:
-                            worksheet.write(row, 0,new_lines[i]['code'], mainheaders)
-                            # col+=1
-                            worksheet.write(row, 1, name, mainheaders)
-                            col = 2
-                            for j in range(len(acc_balance)):
-                                worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
-                                col+=1
-                            if self.dimension_wise_project == 'dimension':
-                                projects = new_lines[i]['project']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(projects)):
-                                        worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                        col+=1
-                                    row+=1
-                            elif self.dimension_wise_project == 'month':
-                                months = new_lines[i]['month']
-                                if self.show_dr_cr_separately:
-                                    col = 9
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                        col+=1
-                                    row+=1
-                                else:
-                                    col = 7
-                                    for j in range(len(months)):
-                                        worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                        col+=1
-                                    row+=1
-
-                            else:
-                                row+=1
-                  
-        else:
-            for i in range(len(new_lines)):
-                acc_balance = new_lines[i]['columns']
-                if self.show_dr_cr_separately:
-                    acc_balance = acc_balance
-                else:
-                    acc_balance = acc_balance[2:]
-                
-                name = ''
-                code = ''
-                if not new_lines[i].get('code'):
-                    name = new_lines[i]['name']
-                    if isinstance(new_lines[i]['id'], int):              
-                        worksheet.write(row, 0,'', mainheaderdata)
-                        # col+=1
-                        worksheet.write(row, 1 , name, mainheaderdata)
-                        col = 2
-                        for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
-                            col+=1
-                        if self.dimension_wise_project == 'dimension':
-                            projects = new_lines[i]['project']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                    col+=1
-                                row+=1
-                        elif self.dimension_wise_project == 'month':
-                            months = new_lines[i]['month']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                    col+=1
-                                row+=1
-
-                        else:
-                            row+=1
-                    else:
-                        worksheet.write(row, 0,'', mainheaders)
-                        # col+=1
-                        worksheet.write(row, 1 , name, mainheaders)
-                        col = 2
-                        for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
-                            col+=1
-                        if self.dimension_wise_project == 'dimension':
-                            projects = new_lines[i]['project']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                    col+=1
-                                row+=1
-                        elif self.dimension_wise_project == 'month':
-                            months = new_lines[i]['month']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                    col+=1
-                                row+=1
-
-                        else:
-                            row+=1
-
-
-                else:
-                    name = new_lines[i]['name'].replace(new_lines[i]['code'],"")
-                    code = new_lines[i]['code']
-                    if isinstance(new_lines[i]['id'], int):
-                        worksheet.write(row, 0,new_lines[i]['code'], mainheaderdata) 
-                        worksheet.write(row, 1, name, mainheaderdata)
-                        col = 2
-                        for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaderdata)
-                            col+=1
-                        if self.dimension_wise_project == 'dimension':
-                            projects = new_lines[i]['project']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaderdata)
-                                    col+=1
-                                row+=1
-                        elif self.dimension_wise_project == 'month':
-                            months = new_lines[i]['month']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaderdata)
-                                    col+=1
-                                row+=1
-
-                        else:
-                            row+=1
-
-                    else:
-
-                        worksheet.write(row, 0,new_lines[i]['code'], mainheaders)
-                        worksheet.write(row, 1, name, mainheaders)
-                        col = 2
-                        for j in range(len(acc_balance)):
-                            worksheet.write(row, col, acc_balance[j]['name'],mainheaders)
-                            col+=1
-                        if self.dimension_wise_project == 'dimension':
-                            projects = new_lines[i]['project']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(projects)):
-                                    worksheet.write(row, col,list(projects[j].values())[0], mainheaders)
-                                    col+=1
-                                row+=1
-                        elif self.dimension_wise_project == 'month':
-                            months = new_lines[i]['month']
-                            if self.show_dr_cr_separately:
-                                col = 9
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                    col+=1
-                                row+=1
-                            else:
-                                col = 7
-                                for j in range(len(months)):
-                                    worksheet.write(row, col,(list(months[j].values())[0]), mainheaders)
-                                    col+=1
-                                row+=1
-
-                        else:
-                            row+=1
-
+            elif self.dimension_wise_project == 'month':
+                months = new_lines[i]['month']
+                col = 9
+                for j in range(len(months)):
+                    worksheet.write(row, col, (list(months[j].values())[0]),linedata)
+                    col+=1
+                row+=1
+            else:
+                row+=1
 
         row+=2
         buffer = io.BytesIO()
@@ -1412,10 +1017,10 @@ class AccountTrialBalanceReport(models.TransientModel):
 
 
     def dimension_group_line_calculation(self,lines):
-
         accounts_hierarchy = {}
         no_group_lines = []
         new_lines = []
+        # new_dimension_list = []
         for line in lines + [None]:
             is_grouped_by_account = line and (line.get('caret_options') == 'account.account' or line.get('account_id'))
             if not is_grouped_by_account or not line:
@@ -1670,14 +1275,13 @@ class AccountTrialBalanceReport(models.TransientModel):
         new_analytic_list = []
         total_balance_list = []
         total_list = []
-        another_analytic_list = []
         for j in range(0,len(new_list)):
             s = 0
             for k in range(0,len(main_list)):
                 if new_list[j]['id'] == main_list[k]['id']:
-                    column1.append({main_list[k]['analytic_account_id']:main_list[k]['balance'],  'class': 'number', 'no_format_name': main_list[k]['balance']})
+                    column1.append({main_list[k]['analytic_account_id']:main_list[k]['balance'], 'class': 'number', 'no_format_name': main_list[k]['balance']})
                     a1 = [(list(c.keys())[0]) for c in column1]
-                    res = column1 + [{i:0, 'class': 'number', 'no_format_name': 0.0} for i in ac_names if i not in a1]
+                    res = column1 + [{i:0.0, 'class': 'number', 'no_format_name': 0.0} for i in ac_names if i not in a1]
                     res2 = sorted(res, key=lambda d: sorted(d.items()))
                     new_list[j]['columns'] = res2
                     new_list[j]['caret_options'] = 'account.account'
@@ -1685,25 +1289,25 @@ class AccountTrialBalanceReport(models.TransientModel):
                     new_list[j]['parent_id'] = 'hierarchy_' + str(main_list[k]['group_code']) + str(" ") + str(main_list[k]['group_name'])
                 else:
                    column1.clear()
-
+        
             if new_list[j]['id']:
-
+                totaldebit += new_list[j]['debit']
+                totalcredit += new_list[j]['credit']
+                totalbalance += new_list[j]['balance']
                 totla_columns = new_list[j]['columns']
                 for i in totla_columns:
                     if (list(i.keys())[0]) not in analytic_list:
                         new_analytic_list.append(i)
                         analytic_list.append((list(i.keys())[0]))
-                    else:
-                        another_analytic_list.append(i)
-                           
-        for col in another_analytic_list:
-            for k in new_analytic_list:
-                if (list(col.keys())[0]) == (list(k.keys())[0]):
-                    tb = list(col.values())[0] + list(k.values())[0]
-                    if (list(k.keys())[0]) not in total_list:
-                        total_balance_list.append({(list(k.keys())[0]):tb, 'class': 'number', 'no_format_name': tb})
-                        total_list.append(list(k.keys())[0])
-          
+
+                for col in totla_columns:
+                    for k in new_analytic_list:
+                        if (list(col.keys())[0]) == (list(k.keys())[0]):
+                            totalbalance = (list(col.values())[0]) + (list(k.values())[0])
+                            if (list(col.keys())[0]) not in total_list:
+                                total_balance_list.append({(list(col.keys())[0]):totalbalance,'class': 'number', 'no_format_name': totalbalance})
+                                total_list.append((list(col.keys())[0]))
+                   
         new_list.append({
              'id': 'grouped_accounts_total',
              'account_code': 'group_code',
@@ -1844,7 +1448,6 @@ class AccountTrialBalanceReport(models.TransientModel):
         new_month_list = []
         total_balance_list = []
         total_list = []
-        another_month_list = []
         for j in range(0,len(new_list)):
             for k in range(0,len(main_list)):
                 if new_list[j]['id'] == main_list[k]['id']:
@@ -1860,22 +1463,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                    column1.clear()
 
             if new_list[j]['id']:
+                totaldebit += new_list[j]['debit']
+                totalcredit += new_list[j]['credit']
+                totalbalance += new_list[j]['balance']
                 totla_columns = new_list[j]['columns']
                 for i in totla_columns:
                     if (list(i.keys())[0]) not in month_list:
                         new_month_list.append(i)
                         month_list.append((list(i.keys())[0]))
-                    else:
-                        another_month_list.append(i)
-                      
-        for col in another_month_list:
-            for k in new_month_list:
-                if (list(col.keys())[0]) == (list(k.keys())[0]):
-                    tb = list(col.values())[0] + list(k.values())[0]
-                    if (list(k.keys())[0]) not in total_list:
-                        total_balance_list.append({(list(k.keys())[0]):tb, 'class': 'number', 'no_format_name': tb})
-                        total_list.append(list(k.keys())[0])
-          
+                for col in totla_columns:
+                    for k in new_month_list:
+                        if (list(col.keys())[0]) == (list(k.keys())[0]):
+                            totalbalance = (list(col.values())[0]) + (list(k.values())[0])
+                            if (list(col.keys())[0]) not in total_list:
+                                total_balance_list.append({(list(col.keys())[0]):totalbalance,'class': 'number', 'no_format_name': totalbalance})
+                                total_list.append((list(col.keys())[0]))
+                  
         new_list.append({
              'id': 'grouped_accounts_total',
              'account_code': 'group_code',

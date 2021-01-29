@@ -7,3 +7,4 @@
 ##############################################################################
 from . import account
 from . import account_trial_balance
+from . import account_group

@@ -27,8 +27,8 @@
 	                    </group>
 	                    <group string="Other Filters">
 	                        <field name="account_zero_closing_balance" invisible="1"/>
-	                        <field name="show_dr_cr_separately"/>
 							<field name="account_without_transaction"/>
+	                        <field name="show_dr_cr_separately"/>
 	                        <field name="dimension_wise_project"/>
 	                        <field name="projectwise" attrs="{'required': [('dimension_wise_project','=','dimension')],'invisible': [('dimension_wise_project','!=','dimension')]}"/>
 	  						<field name="analytic_account_ids" attrs="{'invisible': [('dimension_wise_project','!=','dimension')]}"
