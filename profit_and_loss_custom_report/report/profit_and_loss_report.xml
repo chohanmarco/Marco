@@ -58,8 +58,7 @@
                                     <t t-set="depreciationtotal" t-value="depreciationtotal+val.get('balance')"/>
                                 </t>
                                 <t t-set="grossprofittotal" t-value="operatingtotal+costrevenuetotal"/>
-                                <t t-set="expensestotal" t-value="expensetotal+depreciationtotal"/>  
-                                <t t-set="netprofit" t-value="grossprofittotal+otherincometotal+expensestotal"/>
+                                <t t-set="expensestotal" t-value="expensetotal+depreciationtotal"/>
                                 <t t-if="grossprofittotal > 0">
                                     <t t-set="OpPercentage" t-value="(operatingtotal * 100)/ grossprofittotal"/>
                                     <t t-set="OinPercentage" t-value="(otherincometotal * 100)/ grossprofittotal"/>
@@ -115,8 +114,9 @@
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('balance')"/>
                                     </td>
-                                    <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                    <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
+                                        <t t-esc="percentage" />
                                     </td>
                                 </t>
                             </tr>
@@ -144,10 +144,9 @@
                                         <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('balance')"/>
                                         </td>
-                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <t t-if="grossprofittotal > 0">
-                                                <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
-                                            </t>
+                                        <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
+                                                <t t-esc="percentage" />
                                         </td>
                                     </t>
                                 </tr>
@@ -175,8 +174,9 @@
                                         <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('balance')"/>
                                         </td>
-                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                        <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                           <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
+                                                <t t-esc="percentage" />
                                         </td>
                                     </t>
                                 </tr>
@@ -216,8 +216,9 @@
                                         <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('balance')"/>
                                         </td>
-                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                        <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
+                                                <t t-esc="percentage" />
                                         </td>
                                     </t>
                                 </tr>
@@ -246,9 +247,10 @@
                                         <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('balance')"/>
                                         </td>
-                                        <td class="text-right" style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                           
-                                        <t t-esc="percentage"  t-value="(val.get('balance') * 100)/ grossprofittotal"/>
+                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
+                                                <t t-esc="percentage" />
                                         </td>
                                     </t>
                                 </tr>
@@ -258,8 +260,9 @@
                                     </td>
                                     <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     </td>
-                                    <td class="text-right" style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="netprofit" />
+                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <t t-set="netprofit" t-value="grossprofittotal+otherincometotal+expensestotal"/>
+                                            <t t-esc="netprofit" />
                                     </td>
                                     <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     </td>

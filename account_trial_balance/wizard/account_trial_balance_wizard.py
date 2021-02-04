@@ -1286,7 +1286,7 @@ class AccountTrialBalanceReport(models.TransientModel):
         # Wrap the query with 'company_id IN (...)' to avoid bypassing company access rights.
         self.env['account.move.line']._apply_ir_rules(query)
 
-        return query.get_sql()                
+        return query.get_sql()               
 
     def get_all_queries(self,option_list,expanded_account=None):
         queries = []
@@ -1323,7 +1323,7 @@ class AccountTrialBalanceReport(models.TransientModel):
                 SELECT
                     account_move_line.account_id                            AS groupby,
                     'sum'                                                   AS key,
-                    MAX(account_move_line.date)                             AS max_date,
+                    MAX(account_move_line.date)                            AS max_date,
                     %s                                                      AS period_number,
                     COALESCE(SUM(account_move_line.amount_currency), 0.0)   AS amount_currency,
                     SUM(ROUND(account_move_line.debit * currency_table.rate, currency_table.precision))   AS debit,
@@ -1697,7 +1697,6 @@ class AccountTrialBalanceReport(models.TransientModel):
         total_list = []
         another_analytic_list = []
         for j in range(0,len(new_list)):
-            s = 0
             for k in range(0,len(main_list)):
                 if new_list[j]['id'] == main_list[k]['id']:
                     column1.append({main_list[k]['analytic_account_id']:main_list[k]['balance'],  'class': 'number', 'no_format_name': main_list[k]['balance']})
@@ -1712,7 +1711,6 @@ class AccountTrialBalanceReport(models.TransientModel):
                    column1.clear()
 
             if new_list[j]['id']:
-
                 totla_columns = new_list[j]['columns']
                 for i in totla_columns:
                     if (list(i.keys())[0]) not in analytic_list:
