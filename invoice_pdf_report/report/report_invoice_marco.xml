@@ -1,19 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+    <template id="external_layout_marco_invoice">
+        <t t-if="not o" t-set="o" t-value="doc"/>
 
-    <template id="web.external_layout_standard">
-        <div t-attf-class="header o_company_#{company.id}_layout"
-            style="margin-left: 585px;">
+        <!-- <t t-if="not company"> -->
+            <!-- Multicompany -->
+            <!-- <t t-if="company_id">
+                <t t-set="company" t-value="company_id"/>
+            </t>
+            <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
+                <t t-set="company" t-value="o.company_id.sudo()"/>
+            </t>
+            <t t-else="else">
+                <t t-set="company" t-value="res_company"/>
+            </t> -->
+        <!-- </t> -->
+
+        <div class="header o_report_layout_standard">
             <div class="row">
-                <div class="col-3 mb4 text-right">
-                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 80px;" alt="Logo"/>
+                <div style="margin-left: 585px;">
+                    <div class="row">
+                        <div class="col-3 mb4 text-right">
+                            <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 80px;" alt="Logo"/>
+                        </div>
+                        <div class="col-9 text-right" style="margin-top:22px;" t-field="o.company_id.report_header" name="moto"/>
+                    </div>
                 </div>
-                <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/>
             </div>
         </div>
 
-        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <div t-attf-class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="text-center">
                 <strong class="mr16" style="font-size:24px;">Tax Invoice</strong><br/>
                 <strong>فاتورة ضريبية</strong>
@@ -96,7 +113,7 @@
             <t t-raw="0"/>
         </div>
 
-        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+        <div t-attf-class="footer o_standard_footer">
             <div class="text-center" style="border-top: 1px solid black;font-size:12px;">
                 <ul class="list-inline mb4">
                     <p>مركز الدهناء الدور الثاني – 6634 شارع الأحساء، الزهراء – ص.ب 3130 – الرياض 12815، المملكة العربية السعودية – س.ت 1010428213– هاتف 00966112912250</p>
@@ -104,28 +121,28 @@
                 <ul class="list-inline mb4">
                     <!-- using the list-inline-item class from bootstrap causes weird behaviours in pdf report
                          adding d-inline class fixes the problem-->
-                    <li t-if="company.street" class="list-inline-item d-inline">
-                        <span t-field="company.street"/> -
+                    <li t-if="o.company_id.street" class="list-inline-item d-inline">
+                        <span t-field="o.company_id.street"/> -
                     </li>
-                    <li t-if="company.street2" class="list-inline-item d-inline">
-                        <span t-field="company.street2"/> -
+                    <li t-if="o.company_id.street2" class="list-inline-item d-inline">
+                        <span t-field="o.company_id.street2"/> -
                     </li>
-                    <li t-if="company.city" class="list-inline-item d-inline">
-                        <span t-field="company.city"/>
+                    <li t-if="o.company_id.city" class="list-inline-item d-inline">
+                        <span t-field="o.company_id.city"/>
                     </li>
-                    <li t-if="company.state_id" class="list-inline-item d-inline">
-                        <span t-field="company.state_id"/>
-                        <span t-field="company.zip"/>, 
+                    <li t-if="o.company_id.state_id" class="list-inline-item d-inline">
+                        <span t-field="o.company_id.state_id"/>
+                        <span t-field="o.company_id.zip"/>, 
                     </li>
-                    <li t-if="company.country_id" class="list-inline-item d-inline">
-                        <span t-field="company.country_id"/> -
+                    <li t-if="o.company_id.country_id" class="list-inline-item d-inline">
+                        <span t-field="o.company_id.country_id"/> -
                     </li>
-                    <li t-if="company.vat" class="list-inline-item d-inline"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>  <span t-field="company.vat"/> - </li>
-                    <li t-if="company.phone" class="list-inline-item d-inline">Tel <span class="o_force_ltr" t-field="company.phone"/></li>
+                    <li t-if="o.company_id.vat" class="list-inline-item d-inline"><t t-esc="o.company_id.country_id.vat_label or 'Tax ID'"/>  <span t-field="o.company_id.vat"/> - </li>
+                    <li t-if="o.company_id.phone" class="list-inline-item d-inline">Tel <span class="o_force_ltr" t-field="o.company_id.phone"/></li>
                 </ul>
 
                 <div name="financial_infos">
-                    <span t-field="company.report_footer"/>
+                    <span t-field="o.company_id.report_footer"/>
                 </div>
 
             </div>
@@ -133,7 +150,7 @@
     </template>
 
     <template id="report_invoice_custom_document_marco">
-        <t t-call="web.external_layout">
+        <t t-call="invoice_pdf_report.external_layout_marco_invoice">
             <t t-set="o" t-value="o.with_context(lang=lang)" />
             <div class="page">
                 <div style="width:820px;">
@@ -264,6 +281,8 @@
             </div>
         </t>
     </template>
+
+    
 
     <template id="report_invoice_marco">
         <t t-call="web.html_container">
