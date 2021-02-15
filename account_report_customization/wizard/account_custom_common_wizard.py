@@ -152,7 +152,41 @@ class AccountCustomReport(models.TransientModel):
             vals['analytic_account_ids'] = [(6, 0, aniids)]
         return vals
 
+    def get_initials(self,account):
+        AccountAccountObj = self.env['account.account']
+        Account = AccountAccountObj.search([('name','=',account)])
+        Status = ['posted']
+        if Account:
+            self.env.cr.execute("""
+                SELECT sum(aml.debit)
+                FROM account_move_line aml
+                LEFT JOIN account_move am ON (am.id=aml.move_id)
+                WHERE (aml.date < %s) AND
+                    (aml.account_id in %s) AND
+                    (am.state in %s)""",
+                (str(self.date_from) + ' 00:00:00', tuple([Account.id]), tuple(Status),))
+            InitialDebit = self.env.cr.fetchone()
+            self.env.cr.execute("""
+                SELECT sum(aml.credit)
+                FROM account_move_line aml
+                LEFT JOIN account_move am ON (am.id=aml.move_id)
+                WHERE (aml.date < %s) AND
+                    (aml.account_id in %s) AND
+                    (am.state in %s)""",
+                (str(self.date_from) + ' 00:00:00', tuple([Account.id]), tuple(Status),))
+            InitialCredit = self.env.cr.fetchone()
 
+            if InitialDebit[0] is None:
+                InitialDebit = 0.0 
+            else:
+                InitialDebit = InitialDebit[0]
+                
+            if InitialCredit[0] is None:
+                InitialCredit = 0.0
+            else:
+                InitialCredit = InitialCredit[0]
+            InitialBalance = InitialDebit - InitialCredit
+            return InitialDebit,InitialCredit,InitialBalance
 
     def general_ledger_export_excel(self):
         """
@@ -178,18 +212,32 @@ class AccountCustomReport(models.TransientModel):
             AnalyticAccountIds = AllAnalyticAccounts
 
         DynamicList = [analytic_account.name for analytic_account in AnalyticAccountIds]
+        MoveLines = []
         for Account in self.env['account.account'].browse(AccountIds):
             Balance = 0.0
-            self.env.cr.execute("""
-                SELECT aml.id
-                FROM account_move_line aml
-                LEFT JOIN account_move am ON (am.id=aml.move_id)
-                WHERE (aml.date >= %s) AND
-                    (aml.date <= %s) AND
-                    (aml.account_id in %s) AND
-                    (am.state in %s) ORDER BY aml.date""",
-                (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
-            MoveLines = [x[0] for x in self.env.cr.fetchall()]
+            if self.dimension_wise_project:
+                self.env.cr.execute("""
+                    SELECT aml.id
+                    FROM account_move_line aml
+                    LEFT JOIN account_move am ON (am.id=aml.move_id)
+                    WHERE (aml.date >= %s) AND
+                        (aml.date <= %s) AND
+                        (aml.account_id in %s) AND
+                        (aml.analytic_account_id in %s) AND
+                        (am.state in %s) ORDER BY aml.date""",
+                    (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple([Account.id]), tuple(AnalyticAccountIds.ids), tuple(Status),))
+                MoveLines = [x[0] for x in self.env.cr.fetchall()]
+            else:
+                self.env.cr.execute("""
+                    SELECT aml.id
+                    FROM account_move_line aml
+                    LEFT JOIN account_move am ON (am.id=aml.move_id)
+                    WHERE (aml.date >= %s) AND
+                        (aml.date <= %s) AND
+                        (aml.account_id in %s) AND
+                        (am.state in %s) ORDER BY aml.date""",
+                    (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
+                MoveLines = [x[0] for x in self.env.cr.fetchall()]
             MoveLineIds = self.env['account.move.line'].sudo().browse(MoveLines)
             if MoveLineIds:
                 for ml in MoveLineIds:
@@ -242,7 +290,6 @@ class AccountCustomReport(models.TransientModel):
                     for analytic in DynamicList:
                         AnalyticVals.append({analytic:0.0})
                 Vals.update({'analytic_vals':AnalyticVals})
-
 
         import base64
         filename = 'General Ledger.xls'
@@ -361,9 +408,34 @@ class AccountCustomReport(models.TransientModel):
             newDict = {}
             worksheet.row(row).height_mismatch = True
             worksheet.row(row).height = 310
+            initial_debit = 0.0
+            initial_credit = 0.0
+            initial_balance = 0.0
             worksheet.write_merge(row, row, 0, calc, str(ac),stylecolumnheader)
+            if not self.dimension_wise_project:
+                row+=1
+                worksheet.write(row, 0, 'Initial Balance', linedata)
+                worksheet.write(row, 1,'', rightfont)
+                worksheet.write(row, 2,'', rightfont)
+                initial_debit,initial_credit,initial_balance = self.get_initials(ac)
+                
+                if initial_debit == 0.0:
+                    worksheet.write(row, 3, 0.0,rightfont)
+                else:
+                    worksheet.write(row, 3, initial_debit,floatstyle)
+                if initial_credit == 0.0:
+                    worksheet.write(row, 4, 0.0,rightfont)
+                else:
+                    worksheet.write(row, 4, initial_credit,floatstyle)
+                if initial_balance == 0.0:
+                    worksheet.write(row, 5, 0.0,rightfont)
+                else:
+                    worksheet.write(row, 5, initial_balance,floatstyle)
             subtotal_debit = 0.0
             subtotal_credit = 0.0
+            if not self.dimension_wise_project:
+                subtotal_debit += initial_debit
+                subtotal_credit += initial_credit
             Subvals = {}
             for line in mainDict.get(ac):
                 row+=1
