@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_balance_sheet">
+        <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h3 class="text-center">Balance Sheet</h3>
+                <table class="table table-condensed">
+                    <thead>
+                        <!-- <tr>
+                         	<th><strong>From: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_from'),'%Y-%m-%d'))"/> </strong>
+                        	&#160;<strong> To: <span t-esc="time.strftime('%d-%b-%Y',time.strptime(data['form'].get('date_to'),'%Y-%m-%d'))"/></strong></th>
+                        </tr> -->
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <t t-if="get_balance_sheet">
+                    <table class="table table-condensed" style="border:solid 1px;">
+                        <br/>
+                        <thead>
+
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Code</strong></th>
+                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Name</strong></th>
+                                <th style="font-size:16px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Balance</strong></th>
+                            </tr>
+                        	
+                        </thead>
+                        <tbody>
+                        	<t t-set="banksubtotal" t-value="0" />
+                            <t t-set="receivablesubtotal" t-value="0" />
+                            <t t-set="currentsubtotal" t-value="0" />
+                            <t t-set="fixedsubtotal" t-value="0" />
+                            <t t-set="subtotalcurrentassets" t-value="0" />
+                            <t t-set="totalassets" t-value="0" />
+                            <t t-set="liabilitiessubtotal" t-value="0" />
+                            <t t-set="payablesubtotal" t-value="0" />
+                            <t t-set="subtotalcurrentliabilities" t-value="0" />
+                            <t t-set="totalliabilities" t-value="0" />
+                            <t t-set="currenyearsubtotal" t-value="0" />
+                            <t t-set="totalcurrentyearunallocatedearnings" t-value="0" />
+                            <t t-set="previouscurrentyearunallocatedearnings" t-value="0" />
+                            <t t-set="totalunallocatedearnings" t-value="0" />
+                            <t t-set="retainedearnings" t-value="0" />
+                            <t t-set="totalequity" t-value="0" />
+                            <t t-set="totalequityliabilities" t-value="0" /> 
+
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Bank and Cash'">
+                                    <t t-set="banksubtotal" t-value="banksubtotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Receivable'">
+                                    <t t-set="receivablesubtotal" t-value="receivablesubtotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Current Assets'">
+                                    <t t-set="currentsubtotal" t-value="currentsubtotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Fixed Assets'">
+                                    <t t-set="fixedsubtotal" t-value="fixedsubtotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Current Liabilities'">
+                                    <t t-set="liabilitiessubtotal" t-value="liabilitiessubtotal+(-val.get('balance'))"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Payable'">
+                                    <t t-set="payablesubtotal" t-value="payablesubtotal+(-val.get('balance'))"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Current Year Earnings'">
+                                    <t t-set="currenyearsubtotal" t-value="currenyearsubtotal+val.get('balance')"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Equity'">
+                                    <t t-set="retainedearnings" t-value="retainedearnings+(-val.get('balance'))"/>
+                                </t>
+                                <t t-set="subtotalcurrentassets" t-value="banksubtotal+receivablesubtotal+currentsubtotal"/>
+                                <t t-set="totalassets" t-value="subtotalcurrentassets+fixedsubtotal"/>
+                                <t t-set="subtotalcurrentliabilities" t-value="liabilitiessubtotal+payablesubtotal"/>
+                                <t t-set="totalliabilities" t-value="subtotalcurrentliabilities"/>
+                                <t t-if="val['account_name'] == 'Current Year Earnings ' and 'Current Year Allocated Earnings'">
+                                	<t t-set="totalcurrentyearunallocatedearnings" t-value="0"/>
+                                </t>
+                                <t t-if="val['account_name'] == 'Current Year Earnings ' ">
+                                	<t t-set="totalcurrentyearunallocatedearnings" t-value="currenyearsubtotal"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'previous year'">
+    								<t t-set="previouscurrentyearunallocatedearnings" t-value="val.get('balance')"/>
+    							</t>
+								<t t-if="val['account_type'] != 'previous year'">
+    								<t t-set="previouscurrentyearunallocatedearnings" t-value="0"/>
+    							</t>
+    							<t t-if="val['account_type'] == 'previous year' and 'previous year''Current Year Earnings'">
+                                	<t t-set="totalunallocatedearnings" t-value="0.0"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'previous year'">
+                                	<t t-set="totalunallocatedearnings" t-value="previouscurrentyearunallocatedearnings"/>
+                                </t>
+                                <t t-if="val['account_type'] == 'Current Year Earnings'">
+                                	<t t-set="totalunallocatedearnings" t-value="totalcurrentyearunallocatedearnings"/>
+                                </t>
+                                <t t-set="totalequity" t-value="totalunallocatedearnings+retainedearnings"/>
+                                <t t-set="totalequityliabilities" t-value="totalequity+totalliabilities"/>
+
+                            </tr>
+                        	<tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>ASSETS</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Current Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <!-- <span t-esc="grossprofittotal"/> -->
+                                </td>
+                                
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Bank and Cash Accounts</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <!-- <span t-esc="grossprofittotal"/> -->
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Bank and Cash'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('balance')"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Bank and Cash Accounts</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="banksubtotal"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Receivables</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Receivable'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('balance')"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Receivables</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="receivablesubtotal"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Current Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Current Assets'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('balance')"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Current Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="currentsubtotal"/>
+                                </td>
+                            </tr>
+                           	<tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Prepayments</strong>
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="0.0"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Current Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="subtotalcurrentassets"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Plus Fixed Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Fixed Assets'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('balance')"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Plus Fixed Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="fixedsubtotal"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Plus Non-current Assets</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="0.0"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total ASSETS</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalassets"/>
+                                </td>
+                              
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>LIABILITIES</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                   
+                                </td>
+                                
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Current Liabilities</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                   
+                                </td>
+                                
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Current Liabilities</strong>
+                                </td>
+                              
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Current Liabilities'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="(-val.get('balance'))"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Current Liabilities</strong>
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="liabilitiessubtotal"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Payables</strong>
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Payable'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="(-val.get('balance'))"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Payables</strong>
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="payablesubtotal"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Current Liabilities</strong>
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="subtotalcurrentliabilities"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Plus Non-current Liabilities</strong>
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="0.0"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total LIABILITIES</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                              
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalliabilities"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>EQUITY</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Unallocated Earnings</strong>
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Current Year Unallocated Earnings</strong>
+                                </td>
+                             
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Current Year Earnings'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('balance')"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Current Year Unallocated Earnings</strong>
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalcurrentyearunallocatedearnings"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Previous Years Unallocated Earnings</strong>
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="previouscurrentyearunallocatedearnings"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Unallocated Earnings</strong>
+                                </td>
+                              
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalunallocatedearnings"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Retained Earnings</strong>
+                                </td>
+                               
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                            </tr>
+                            <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <t t-if="val['account_type'] == 'Equity'">
+                                    <td style="width: 80px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_code')"/>
+                                    </td>
+                                    <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="val.get('account_name')"/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="(-val.get('balance'))"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total Retained Earnings</strong>
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="retainedearnings"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>Total EQUITY</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalequity"/>
+                                </td>
+                            </tr>
+                            <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <strong>LIABILITIES + EQUITY</strong>
+                                </td>
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </td>
+                                
+                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalequityliabilities"/>
+                                </td>
+                            </tr>
+                             
+                        </tbody>
+                    </table>
+                </t>
+            </div>
+        </t>
+        </t>
+    </template>
+
+    <report
+        id="action_report_balance_sheet"
+        string="Balance Sheet"
+        model="account.move.line"
+        report_type="qweb-pdf"
+        file="account_balance_sheet.report_balance_sheet"
+        name="account_balance_sheet.report_balance_sheet"
+        menu="False"
+        paperformat="account_report_customization.paperformat_general_ledger_pdf"/>
+
+</odoo>
