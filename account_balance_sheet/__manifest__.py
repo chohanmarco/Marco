@@ -6,7 +6,7 @@
         Balance Sheet""",
 
     'description': """
-        Long description of module's purpose
+        Adds Balance Sheet report in PDF and Xls Format
     """,
 
     'author': "My Company",
