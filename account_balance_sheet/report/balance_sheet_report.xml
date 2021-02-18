@@ -45,7 +45,8 @@
                             <t t-set="totalunallocatedearnings" t-value="0" />
                             <t t-set="retainedearnings" t-value="0" />
                             <t t-set="totalequity" t-value="0" />
-                            <t t-set="totalequityliabilities" t-value="0" /> 
+                            <t t-set="totalequityliabilities" t-value="0" />
+                            <t t-set="totalcurrentyearallocatedearnings" t-value="0" />
 
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 <t t-if="val['account_type'] == 'Bank and Cash'">
@@ -66,8 +67,8 @@
                                 <t t-if="val['account_type'] == 'Payable'">
                                     <t t-set="payablesubtotal" t-value="payablesubtotal+(-val.get('balance'))"/>
                                 </t>
-                                <t t-if="val['account_type'] == 'Current Year Earnings'">
-                                    <t t-set="currenyearsubtotal" t-value="currenyearsubtotal+val.get('balance')"/>
+                                <t t-if="val['account_name'] == 'Current Year Earnings'">
+                                    <t t-set="currenyearsubtotal" t-value="val.get('balance')"/>
                                 </t>
                                 <t t-if="val['account_type'] == 'Equity'">
                                     <t t-set="retainedearnings" t-value="retainedearnings+(-val.get('balance'))"/>
@@ -76,59 +77,73 @@
                                 <t t-set="totalassets" t-value="subtotalcurrentassets+fixedsubtotal"/>
                                 <t t-set="subtotalcurrentliabilities" t-value="liabilitiessubtotal+payablesubtotal"/>
                                 <t t-set="totalliabilities" t-value="subtotalcurrentliabilities"/>
-                                <t t-if="val['account_name'] == 'Current Year Earnings ' and 'Current Year Allocated Earnings'">
-                                	<t t-set="totalcurrentyearunallocatedearnings" t-value="0"/>
-                                </t>
-                                <t t-if="val['account_name'] == 'Current Year Earnings ' ">
+                                <t t-if="val['account_name'] == 'Current Year Earnings'">
                                 	<t t-set="totalcurrentyearunallocatedearnings" t-value="currenyearsubtotal"/>
                                 </t>
-                                <t t-if="val['account_type'] == 'previous year'">
-    								<t t-set="previouscurrentyearunallocatedearnings" t-value="val.get('balance')"/>
+                                <t t-if="val['account_name'] == 'Current Year Allocated Earnings'">
+                                	<t t-set="totalcurrentyearallocatedearnings" t-value="0"/>
+                                </t>
+                                <t t-if="val['account_name'] == 'Current Year Allocated Earnings'">
+                                	<t t-if= "val['balance'] == totalcurrentyearunallocatedearnings">
+                                		<t t-set="totalcurrentyearunallocatedearnings" t-value="0"/>
+                                	</t>
+                                </t>
+                                <t t-if="val['account_name'] == 'Previous Year'">
+                                	<t t-if="val['balance'] != 0.0">
+    									<t t-set="previouscurrentyearunallocatedearnings" t-value="val.get('balance')"/>
+    								</t>
     							</t>
-								<t t-if="val['account_type'] != 'previous year'">
-    								<t t-set="previouscurrentyearunallocatedearnings" t-value="0"/>
+								<t t-if="val['account_name'] == 'Previous Year'">
+									<t t-if="val['balance'] == 0.0">
+    									<t t-set="previouscurrentyearunallocatedearnings" t-value="0"/>
+    								</t>
     							</t>
-    							<t t-if="val['account_type'] == 'previous year' and 'previous year''Current Year Earnings'">
-                                	<t t-set="totalunallocatedearnings" t-value="0.0"/>
+    							<t t-if="val['account_name'] == 'Previous Year'">
+    								<t t-if="totalcurrentyearunallocatedearnings == 0.0">
+    									<t t-set="totalunallocatedearnings" t-value="previouscurrentyearunallocatedearnings"/>
+    								</t>
                                 </t>
-                                <t t-if="val['account_type'] == 'previous year'">
-                                	<t t-set="totalunallocatedearnings" t-value="previouscurrentyearunallocatedearnings"/>
+                                <t t-if="val['account_name'] == 'Previous Year'">
+    								<t t-if="totalcurrentyearunallocatedearnings != 0.0">
+    									<t t-set="totalunallocatedearnings" t-value="totalcurrentyearunallocatedearnings + totalcurrentyearallocatedearnings"/>
+    								</t>
                                 </t>
-                                <t t-if="val['account_type'] == 'Current Year Earnings'">
-                                	<t t-set="totalunallocatedearnings" t-value="totalcurrentyearunallocatedearnings"/>
-                                </t>
+                                <!-- <t t-if="val['account_name'] == 'Current Year Allocated Earnings'">
+                                	<t t-if="val['balance'] > 0.0">
+                                		<t t-set="totalunallocatedearnings" t-value="0"/>
+                                	</t>
+                                </t> -->
                                 <t t-set="totalequity" t-value="totalunallocatedearnings+retainedearnings"/>
                                 <t t-set="totalequityliabilities" t-value="totalequity+totalliabilities"/>
-
                             </tr>
                         	<tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>ASSETS</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                                 
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Current Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     <!-- <span t-esc="grossprofittotal"/> -->
                                 </td>
                                 
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Bank and Cash Accounts</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+								<td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     <!-- <span t-esc="grossprofittotal"/> -->
                                 </td>
                             </tr>
@@ -141,27 +156,27 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="val.get('balance')"/>
+                                        <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Bank and Cash Accounts</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="banksubtotal"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="banksubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Receivables</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -173,27 +188,27 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="val.get('balance')"/>
+                                        <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Receivables</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="receivablesubtotal"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="receivablesubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Current Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -205,49 +220,50 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="val.get('balance')"/>
+                                        <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Current Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="currentsubtotal"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="currentsubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                            	<tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Prepayments</strong>
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="0.0"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="0.0" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Current Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="subtotalcurrentassets"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="subtotalcurrentassets" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 	
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Plus Fixed Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -259,71 +275,70 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="val.get('balance')"/>
+                                        <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Plus Fixed Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="fixedsubtotal"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="fixedsubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Plus Non-current Assets</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="0.0"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="0.0" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total ASSETS</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="totalassets"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalassets" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                               
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>LIABILITIES</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                    
                                 </td>
                                 
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Current Liabilities</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                   
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                                 
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Current Liabilities</strong>
                                 </td>
                               
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -335,29 +350,29 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="(-val.get('balance'))"/>
+                                        <span t-esc="(-val.get('balance'))" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Current Liabilities</strong>
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="liabilitiessubtotal"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="liabilitiessubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Payables</strong>
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -369,82 +384,82 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="(-val.get('balance'))"/>
+                                        <span t-esc="(-val.get('balance'))" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Payables</strong>
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="payablesubtotal"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="payablesubtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Current Liabilities</strong>
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="subtotalcurrentliabilities"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="subtotalcurrentliabilities" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Plus Non-current Liabilities</strong>
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="0.0"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="0.0" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total LIABILITIES</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                               
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="totalliabilities"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalliabilities" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>EQUITY</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Unallocated Earnings</strong>
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Current Year Unallocated Earnings</strong>
                                 </td>
                              
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -456,51 +471,51 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="val.get('balance')"/>
+                                        <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Current Year Unallocated Earnings</strong>
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="totalcurrentyearunallocatedearnings"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalcurrentyearunallocatedearnings" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Previous Years Unallocated Earnings</strong>
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="previouscurrentyearunallocatedearnings"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="previouscurrentyearunallocatedearnings" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Unallocated Earnings</strong>
                                 </td>
                               
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="totalunallocatedearnings"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalunallocatedearnings" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Retained Earnings</strong>
                                 </td>
                                
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                             </tr>
                             <tr t-foreach="get_balance_sheet" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -512,41 +527,41 @@
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
                                     <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="(-val.get('balance'))"/>
+                                        <span t-esc="(-val.get('balance'))" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total Retained Earnings</strong>
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="retainedearnings"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="retainedearnings" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Total EQUITY</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="totalequity"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalequity" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>LIABILITIES + EQUITY</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 </td>
                                 
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                	<span t-esc="totalequityliabilities"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                	<span t-esc="totalequityliabilities" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                 </td>
                             </tr>
                              

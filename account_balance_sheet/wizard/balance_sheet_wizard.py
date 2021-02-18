@@ -326,8 +326,7 @@ class BalanceSheetReport(models.TransientModel):
                     mainDict[j]['account_name'] =  allData[i]['account_name']
                     mainDict[j]['account_type'] =  allData[i]['account_type']
 
-        
-            
+                    
         allocated_balance = 0.0
         for j in range(len(mainDict)):
             if mainDict[j]['account_type'] == 'Current Year Earnings':
@@ -1191,6 +1190,7 @@ class BalanceSheetReport(models.TransientModel):
         check_ids = []
         dimensiondicts = ''
         res2 = ''
+        check_list = ''
         if self.dimension_wise_project == 'month' or self.dimension_wise_project == 'year':
             new_list,dimensiondicts = self.month_year_wise()
             listd = ''

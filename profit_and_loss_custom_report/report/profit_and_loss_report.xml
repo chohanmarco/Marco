@@ -23,8 +23,8 @@
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 <th style="font-size:16px;width: 80px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Code</strong></th>
                                 <th style="font-size:16px;width: 150px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Account Name</strong></th>
-                                <th style="font-size:16px;width: 450px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Balance</strong></th>
                                 <th style="font-size:16px;width: 120px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Percentage</strong></th>
+                                <th style="font-size:16px;width: 450px;color:#FEFFFF;background-color:#10109B;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"><strong>Balance</strong></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -34,22 +34,29 @@
                             <t t-set="costrevenuetotal" t-value="0" />
                             <t t-set="expensetotal" t-value="0" />
                             <t t-set="expensestotal" t-value="0" />
+                            <t t-set="totalincome" t-value="0" />
+                            <t t-set="totalexpense" t-value="0" />
                             <t t-set="depreciationtotal" t-value="0" />
                             <t t-set="OpPercentage" t-value="0" />
                             <t t-set="OinPercentage" t-value="0" />
+                            <t t-set="GrossPercentage" t-value="0" />
                             <t t-set="CorPercentage" t-value="0" />
                             <t t-set="ExPercentage" t-value="0" />
                             <t t-set="DepPercentage" t-value="0" />
-                            <t t-set="percentage" t-value="0" />           	
+                            <t t-set="IncomePercentage" t-value="0" />
+                            <t t-set="ExpensePercentage" t-value="0" />
+                            <t t-set="netprofitpercentage" t-value="0" />
+                            <t t-set="netprofit" t-value="0" />
+                            <t t-set="percentage" t-value="0" />   	
                             <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 <t t-if="val['account_type'] == 'Income'">
-                                    <t t-set="operatingtotal" t-value="operatingtotal+val.get('balance')"/>
+                                    <t t-set="operatingtotal" t-value="operatingtotal+(-val.get('balance'))"/>
                                 </t>
                                 <t t-if="val['account_type'] == 'Cost of Revenue'">
                                     <t t-set="costrevenuetotal" t-value="costrevenuetotal+val.get('balance')"/>
                                 </t>
                                 <t t-if="val['account_type'] == 'Other Income'">
-                                    <t t-set="otherincometotal" t-value="otherincometotal+val.get('balance')"/>
+                                    <t t-set="otherincometotal" t-value="otherincometotal+(-val.get('balance'))"/>
                                 </t>
                                 <t t-if="val['account_type'] == 'Expenses'">
                                     <t t-set="expensetotal" t-value="expensetotal+val.get('balance')"/>
@@ -57,51 +64,47 @@
                                 <t t-if="val['account_type'] == 'Depreciation'">
                                     <t t-set="depreciationtotal" t-value="depreciationtotal+val.get('balance')"/>
                                 </t>
-                                <t t-set="grossprofittotal" t-value="operatingtotal+costrevenuetotal"/>
+                                <t t-set="grossprofittotal" t-value="operatingtotal-costrevenuetotal"/>
+                                <t t-set="totalincome" t-value="grossprofittotal+otherincometotal"/>
                                 <t t-set="expensestotal" t-value="expensetotal+depreciationtotal"/>
-                                <t t-if="grossprofittotal > 0">
-                                    <t t-set="OpPercentage" t-value="(operatingtotal * 100)/ grossprofittotal"/>
-                                    <t t-set="OinPercentage" t-value="(otherincometotal * 100)/ grossprofittotal"/>
-                                    <t t-set="CorPercentage" t-value="(costrevenuetotal * 100)/ grossprofittotal"/>
-                                    <t t-set="ExPercentage" t-value="(expensetotal * 100)/ grossprofittotal"/>  
-                                    <t t-set="DepPercentage" t-value="(depreciationtotal * 100)/ grossprofittotal"/>
+                                <t t-set="totalexpense" t-value="expensetotal+depreciationtotal"/>
+                                <t t-set="netprofit" t-value="totalincome - totalexpense "/>
+
+                                <t t-if="operatingtotal > 0">
+                                    <t t-set="OpPercentage" t-value="100"/>
+                                    <t t-set="GrossPercentage" t-value="((grossprofittotal) * 100)/ operatingtotal"/>
+                                    <t t-set="IncomePercentage" t-value="((totalincome) * 100)/ operatingtotal"/>
+                                    <t t-set="ExpensePercentage" t-value="((totalexpense) * 100)/ operatingtotal"/>
+                                    <t t-set="OinPercentage" t-value="100"/>
+                                    <t t-set="CorPercentage" t-value="((costrevenuetotal) * 100)/ operatingtotal"/>
+                                    <t t-set="ExPercentage" t-value="((expensetotal) * 100)/ operatingtotal"/>  
+                                    <t t-set="DepPercentage" t-value="((depreciationtotal) * 100)/ operatingtotal"/>
+                                    <t t-set="netprofitpercentage" t-value="((netprofit) * 100)/ operatingtotal"/>
                                 </t>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Income</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                </td>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Gross Profit</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <span t-esc="grossprofittotal"/>
-                                </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                </td>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
                             </tr>
                             <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"> 
-                                </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>Operating Income</strong>
                                 </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <span t-esc="operatingtotal"/>
-                                </td>
-                                <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <span t-esc="OpPercentage"/>
-                                </td>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
                             </tr>
                             <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
                                 <t t-if="val['account_type'] == 'Income'">
@@ -111,26 +114,37 @@
                                     <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <span t-esc="val.get('account_name')"/>
                                     </td>
-                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="val.get('balance')"/>
-                                    </td>
                                     <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
-                                        <t t-esc="percentage" />
+                                        <t t-set="percentage" t-value="((-val.get('balance')) * 100)/ operatingtotal" />
+                                        <t t-esc="percentage" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="(-val.get('balance'))" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </t>
                             </tr>
                                 <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Total Operating Income</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="OpPercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="operatingtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
+                                    </td>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <strong>Cost of Revenue</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="costrevenuetotal"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="CorPercentage"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        
                                     </td>
                                 </tr>
                                 <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -141,26 +155,48 @@
                                         <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('account_name')"/>
                                         </td>
-                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <span t-esc="val.get('balance')"/>
-                                        </td>
                                         <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
-                                                <t t-esc="percentage" />
+                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ operatingtotal" />
+                                                <t t-esc="percentage" t-options='{"widget": "float", "precision": 2}' />
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                         </td>
                                     </t>
                                 </tr>
+                                    <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                        <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                                <strong>Total Cost of Revenue</strong>
+                                        </td>
+                                        <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="CorPercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                        <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="costrevenuetotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
+                                        </td>
+                                    </tr>
+                                    <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                       <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                                <strong>Total Gross Profit</strong>
+                                        </td>
+                                       <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="GrossPercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                       <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="grossprofittotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
+                                        </td>
+                                    </tr>
                                 <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"> 
-                                    </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <strong>Other Income</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="otherincometotal"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="OinPercentage"/>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     </td>
                                 </tr>
                                 <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -171,38 +207,62 @@
                                         <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('account_name')"/>
                                         </td>
-                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <span t-esc="val.get('balance')"/>
-                                        </td>
                                         <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                           <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
-                                                <t t-esc="percentage" />
+                                           <t t-set="percentage" t-value="((-val.get('balance')) * 100)/ operatingtotal" />
+                                                <t t-esc="percentage" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="(-val.get('balance'))" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                         </td>
                                     </t>
                                 </tr>
                                 <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <strong>Expenses</strong>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Total Other Income</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="OinPercentage" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="otherincometotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                </tr>
+                                 <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Total Income</strong>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="IncomePercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="totalincome" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
                                 </tr>
                                 <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    
-                                    </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <strong>Expenses</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="expensetotal"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="ExPercentage"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Expenses</strong>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        
+                                    </td>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    
                                     </td>
                                 </tr>
                                 <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -213,27 +273,39 @@
                                         <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('account_name')"/>
                                         </td>
-                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <span t-esc="val.get('balance')"/>
-                                        </td>
                                         <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
-                                                <t t-esc="percentage" />
+                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ operatingtotal" />
+                                                <t t-esc="percentage" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                         </td>
                                     </t>
                                 </tr>
                                 <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Total Expenses</strong>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="ExPercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="expensetotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
+                                    </td>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <strong>Depreciation</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="depreciationtotal"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <span t-esc="DepPercentage"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                     </td>
                                 </tr>
                                 <tr t-foreach="get_profit_loss" t-as="val" style="border-right:solid 1px;border-left:solid  1px;border-top:solid 1px;border-bottom:solid 1px;">
@@ -244,29 +316,56 @@
                                         <td style="width: 150px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                             <span t-esc="val.get('account_name')"/>
                                         </td>
-                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                            <span t-esc="val.get('balance')"/>
-                                        </td>
                                         <td style="width: 120px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                           
-                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ grossprofittotal" />
-                                                <t t-esc="percentage" />
+                                            <t t-set="percentage" t-value="(val.get('balance') * 100)/ operatingtotal" />
+                                                <t t-esc="percentage" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                        <td style="width: 450px;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <span t-esc="val.get('balance')" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                         </td>
                                     </t>
                                 </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Total Depreciation</strong>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="DepPercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="depreciationtotal" t-options='{"widget": "float", "precision": decimal_precision}'/>
+                                    </td>
+                                </tr>
+                                <tr style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    </td>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                            <strong>Total Expenses</strong>
+                                    </td>
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="ExpensePercentage" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <span t-esc="totalexpense" t-options='{"widget": "float", "precision": decimal_precision}'/>
+                                    </td>
+                                </tr>
 							    <tr style="border-bottom:solid 1px;">
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
                                         <strong>NET PROFIT</strong>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;"/>
+                                    <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        <t t-esc="netprofitpercentage" t-options='{"widget": "float", "precision": 2}'/>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                        <t t-set="netprofit" t-value="grossprofittotal+otherincometotal+expensestotal"/>
-                                            <t t-esc="netprofit" />
+                                   <td style="font-weight: bold;font-size:16px;color:#0000ff;border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
+                                        
+                                        <t t-esc="netprofit" t-options='{"widget": "float", "precision": decimal_precision}'/>
                                     </td>
-                                    <td style="border-right:solid 1px;border-left:solid 1px;border-top:solid 1px;border-bottom:solid 1px;">
-                                    </td>
-                                </tr>    
+                                   
+                                </tr>
                             <br/>
                         </tbody>
                     </table>
