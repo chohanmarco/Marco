@@ -15,6 +15,7 @@ import io
 from odoo.tools.float_utils import float_round
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from odoo.tools.misc import formatLang
 
 class ProfitLossCustomReport(models.TransientModel):
     _name = 'profit.loss.custom.report'
@@ -32,6 +33,36 @@ class ProfitLossCustomReport(models.TransientModel):
     projectwise = fields.Selection([('project', 'Project')],string='Project',default='project')
     analytic_account_ids = fields.Many2many('account.analytic.account', string='Analytic Accounts')
 
+
+    @api.model
+    def format_value(self, amount, currency=False, blank_if_zero=False):
+        ''' Format amount to have a monetary display (with a currency symbol).
+        E.g: 1000 => 1000.0 $
+
+        :param amount:          A number.
+        :param currency:        An optional res.currency record.
+        :param blank_if_zero:   An optional flag forcing the string to be empty if amount is zero.
+        :return:                The formatted amount as a string.
+        '''
+        currency_id = currency or self.env.company.currency_id
+        if currency_id.is_zero(amount):
+            if blank_if_zero:
+                return ''
+            # don't print -0.0 in reports
+            amount = abs(amount)
+
+        if self.env.context.get('no_format'):
+            return amount
+
+        return formatLang(self.env, amount, currency_obj=currency_id)
+
+    def print_report_trial_balance(self):
+        if self.date_from >= self.date_to:
+            raise UserError(_("Start Date is greater than or equal to End Date."))
+        datas = {'form': self.read()[0],
+                 'get_trial_balance': self.get_trial_balance_detail()
+            }
+        return self.env.ref('account_trial_balance.action_report_trial_balance').report_action([], data=datas)
 
     def print_report(self):
       if self.date_from >= self.date_to:
@@ -322,7 +353,7 @@ class ProfitLossCustomReport(models.TransientModel):
         styleheader = xlwt.easyxf('font: bold 1, colour black, height 300;')
         stylecolumnheader = xlwt.easyxf('font: bold 1, colour black, height 200;pattern: pattern solid, fore_colour gainsboro')
         linedata = xlwt.easyxf('align: horiz right;')
-        alinedata = xlwt.easyxf('align: horiz left;')
+        alinedata = xlwt.easyxf('align: horiz left;','#,##.00')
         stylecolaccount = xlwt.easyxf('font: bold 1, colour white, height 200; \
                                       pattern: pattern solid, fore_colour dark_blue; \
                                       align: vert centre, horiz centre;')
@@ -334,7 +365,7 @@ class ProfitLossCustomReport(models.TransientModel):
         maintotal = xlwt.easyxf('font: bold 1, colour black, height 200;')
         finaltotalheader = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour black; align: horiz right;')
         rightfont = xlwt.easyxf('pattern: fore_color white; align: horiz right;')
-        floatstyle = xlwt.easyxf("align: horiz right;","#,###.00")
+        floatstyle = xlwt.easyxf("align: horiz right;","#,##0.00")
         finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black;")
         accountnamestyle = xlwt.easyxf('font: bold 1, colour green, height 200;')
         mainheaders = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz left;')
@@ -345,13 +376,13 @@ class ProfitLossCustomReport(models.TransientModel):
                               top double;')
         netmainheader = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
                                  font: bold 1, colour dark_blue; align: horiz right;borders: bottom_color black,\
-                              bottom double;',"#,##0.00")
+                              bottom double;')
         netmainheaders = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
                                  font: bold 1, colour dark_blue; align: horiz left;borders: bottom_color black,\
                               bottom double;')
         mainheaderline = xlwt.easyxf("pattern: pattern solid, fore_colour gainsboro; \
-                                 font: bold 1, colour dark_blue; align: horiz right;","#,##0.00")
-        mainheaderdata = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;","#,##0.00")
+                                 font: bold 1, colour dark_blue; align: horiz right;")
+        mainheaderdata = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;")
         mainheaderdatas = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;")
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 22
@@ -629,7 +660,7 @@ class ProfitLossCustomReport(models.TransientModel):
                 elif thirddepriciationlist:
                     finalexpense_list.append(thirddepriciationlist[i])
 
-            for i in range(0, len(finalincome_list)): 
+            for i in range(0, len(finalincome_list)):
                 netbalance_list.append(finalincome_list[i] - finalexpense_list[i])
 
         if Projectwise == 'month':
@@ -835,9 +866,9 @@ class ProfitLossCustomReport(models.TransientModel):
                             if p in mainlist_position:
                                 for i in range(len(main_list)):
                                     if main_list[i]['analytic_account_id'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
-                                        worksheet.write(row, v,(abs(main_list[i]['balance'])), floatstyle)
+                                        worksheet.write(row, v,abs(main_list[i]['balance']), floatstyle)
                             else:
-                                worksheet.write(row, v, abs(000),rightfont)
+                                worksheet.write(row, v, abs(00.0),rightfont)
 
                     if Projectwise == 'month':
                         mainlist_position={}
@@ -849,9 +880,9 @@ class ProfitLossCustomReport(models.TransientModel):
                             if p in mainlist_position:
                                 for i in range(len(main_list)):
                                     if main_list[i]['month'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
-                                        worksheet.write(row, v, (abs(main_list[i]['balance'])),floatstyle)
+                                        worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v, abs(000),rightfont)
+                                worksheet.write(row, v, abs(00.0),rightfont)
 
                     if Projectwise == 'year':
                         mainlist_position={}
@@ -865,7 +896,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['year'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v, abs(000),rightfont)
+                                worksheet.write(row, v, abs(00.0),rightfont)
 
                     if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
                         for values in range(len(news_list)):
@@ -893,11 +924,12 @@ class ProfitLossCustomReport(models.TransientModel):
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             if incomeres:
                 for j in range(len(incomeres)):
+                    self.format_value(abs(incomeres[j]))
                     worksheet.write(row, col,abs(incomeres[j]), mainheaderdata)
                     col+=1
             else:
                 for p,v in ColIndexes.items():
-                    worksheet.write(row, col, abs(000),mainheaderdata)
+                    worksheet.write(row, col, abs(00.0), mainheaderdata)
                     col+=1
         row+=1
         worksheet.write(row, 0,'', style = mainheaders)
@@ -933,7 +965,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['analytic_account_id'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v, abs(000),rightfont)
+                                worksheet.write(row, v, abs(00.0),rightfont)
 
                     if Projectwise == 'month':
                         mainlist_position={}
@@ -947,7 +979,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['month'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v,abs(000),rightfont)
+                                worksheet.write(row, v,abs(00.0),rightfont)
 
                     if Projectwise == 'year':
                         mainlist_position={}
@@ -961,7 +993,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['year'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v,abs(000),rightfont)
+                                worksheet.write(row, v,abs(00.0),rightfont)
 
                     if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year' :
                         for values in range(len(news_list)):
@@ -983,7 +1015,7 @@ class ProfitLossCustomReport(models.TransientModel):
         row+=1
         worksheet.write(row,1, 'Total Cost of Revenue', style = mainheaders)
         worksheet.write(row,2, abs(CostOfRevenue), style = mainheaderdata )
-        worksheet.write(row,3, abs(CorPercentage), style = mainheaderdatas)
+        worksheet.write(row,3, round((abs(CorPercentage)),1), style = mainheaderdatas)
         col = 4
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year' :
             if rescost:
@@ -992,14 +1024,14 @@ class ProfitLossCustomReport(models.TransientModel):
                     col+=1
             else:
                 for p,v in ColIndexes.items():
-                    worksheet.write(row, col, abs(000),mainheaderdata)
+                    worksheet.write(row, col, abs(00.0),mainheaderdata)
                     col+=1
 
         row += 1
         res_list = []
         worksheet.write(row,1, 'Total Gross Profit', style = mainheaders)
         worksheet.write(row,2, GrossProfit, style = mainheaderdata )
-        worksheet.write(row,3, GrossProfitPercentage, style = mainheaderdata)
+        worksheet.write(row,3, round((GrossProfitPercentage),1), style = mainheaderdatas)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             if rescost and incomeres :
@@ -1012,7 +1044,8 @@ class ProfitLossCustomReport(models.TransientModel):
 
             elif rescost:
                 for i in range(0, len(rescost)):
-                    worksheet.write(row, col,rescost[i], mainheaderdata)
+                    
+                    worksheet.write(row, col,rescost[s], mainheaderdata)
                     col+=1
 
             elif incomeres:
@@ -1054,7 +1087,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['analytic_account_id'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v,abs(000),rightfont)
+                                worksheet.write(row, v,abs(00.0),rightfont)
                     if Projectwise == 'month':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1067,7 +1100,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['month'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v,abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v, abs(000),rightfont)
+                                worksheet.write(row, v, abs(00.0),rightfont)
                     if Projectwise == 'year':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1080,7 +1113,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['year'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v, abs(main_list[i]['balance']),floatstyle)
                             else:
-                                worksheet.write(row, v, abs(000),rightfont)
+                                worksheet.write(row, v, abs(00.0),rightfont)
 
                     if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year' :
                         for values in range(len(news_list)):
@@ -1102,8 +1135,8 @@ class ProfitLossCustomReport(models.TransientModel):
 
         row+=1
         worksheet.write(row,1, 'Total Other Income', style = mainheaders)
-        worksheet.write(row,2,abs(OtherIncome), style = mainheaderdata )
-        worksheet.write(row,3, abs(100), style = mainheaderdata)
+        worksheet.write(row,2, abs(OtherIncome), style = mainheaderdata )
+        worksheet.write(row,3, round((00.0),1), style = mainheaderdatas)
         col = 4
         if Projectwise == 'dimension':
             if resother:
@@ -1112,15 +1145,15 @@ class ProfitLossCustomReport(models.TransientModel):
                     col+=1
             else:
                 for p,v in ColIndexes.items():
-                    worksheet.write(row, col,abs(000),mainheaderdata)
+                    worksheet.write(row, col,abs(00.0),mainheaderdata)
                     col+=1
 
         row +=1
         totalnetprofitloss = []
         worksheet.write(row,0, 'Total Income', style = mainheader)
         worksheet.write(row,1, '', style = mainheaderline)
-        worksheet.write(row,2, TotalIncome, style = mainheaderline )
-        worksheet.write(row,3, (TotalIncome * 100 / OperatingIncome), style = mainheaderline)
+        worksheet.write(row,2, abs(TotalIncome), style = mainheaderline )
+        worksheet.write(row,3, round((TotalIncome * 100 / OperatingIncome),1), style = mainheaderline)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             for i in range(0, len(finalincome_list)):
@@ -1130,18 +1163,20 @@ class ProfitLossCustomReport(models.TransientModel):
         worksheet.write(row,0, 'Net Profit/Loss', style = mainheader)
         worksheet.write(row,1, '', style = mainheaderline)
         if NetProfit < 0:
+
             worksheet.write(row,2, NetProfit, style = mainheaderline)
         else :
             worksheet.write(row,2, '', style = mainheaderline)
         if NetProfit < 0:
-            worksheet.write(row,3,(NetProfit * 100 / OperatingIncome), style = mainheaderline)
+            worksheet.write(row,3, round((NetProfit * 100 / OperatingIncome),1), style = mainheaderline)
         else:
             worksheet.write(row,3, '', style = mainheaderline)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             for i in range(len(netbalance_list)):
                 if netbalance_list[i] < 0:
-                    worksheet.write(row, col,netbalance_list[i],style = mainheaderline)
+
+                    worksheet.write(row, col, netbalance_list[i], style = mainheaderline)
                 else:
                     worksheet.write(row,col, '', style = mainheaderline)
 
@@ -1190,7 +1225,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['analytic_account_id'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v, main_list[i]['balance'],floatstyle)
                             else:
-                                worksheet.write(row, v, 000,rightfont)
+                                worksheet.write(row, v, 00.0,rightfont)
                     if Projectwise == 'month':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1203,7 +1238,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['month'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v, main_list[i]['balance'],floatstyle)
                             else:
-                                worksheet.write(row, v, 000,rightfont)
+                                worksheet.write(row, v, 00.0, rightfont)
                     if Projectwise == 'year':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1216,7 +1251,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['year'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v, main_list[i]['balance'],floatstyle)
                             else:
-                                worksheet.write(row, v, 000,rightfont)
+                                worksheet.write(row, v, 00.0, rightfont)
 
                     if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
                         for values in range(len(news_list)):
@@ -1239,7 +1274,7 @@ class ProfitLossCustomReport(models.TransientModel):
         row+=1
         worksheet.write(row,1, 'Total Expenses', style = mainheaders)
         worksheet.write(row,2, Expenses, style = mainheaderdata )
-        worksheet.write(row,3, ExpensePercentage, style = mainheaderdatas)
+        worksheet.write(row,3, round((ExpensePercentage),1), style = mainheaderdatas)
         col = 4
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             if resexpense:
@@ -1248,7 +1283,7 @@ class ProfitLossCustomReport(models.TransientModel):
                   col+=1
             else:
                 for p,v in ColIndexes.items():
-                    worksheet.write(row, col,000,mainheaderdata)
+                    worksheet.write(row, col,abs(00.0), mainheaderdata)
                     col+=1
 
         row +=1
@@ -1285,7 +1320,7 @@ class ProfitLossCustomReport(models.TransientModel):
                                     if main_list[i]['analytic_account_id'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
                                         worksheet.write(row, v, main_list[i]['balance'],floatstyle)
                             else:
-                                worksheet.write(row, v, 000,rightfont)
+                                worksheet.write(row, v, 00.0,rightfont)
                     if Projectwise == 'month':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1296,9 +1331,9 @@ class ProfitLossCustomReport(models.TransientModel):
                             if p in mainlist_position:
                                 for i in range(len(main_list)):
                                     if main_list[i]['month'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
-                                        worksheet.write(row, v,main_list[i]['balance'],floatstyle)
+                                        worksheet.write(row, v, main_list[i]['balance'],floatstyle)
                             else:
-                                worksheet.write(row, v, 000,rightfont)
+                                worksheet.write(row, v, 00.0, rightfont)
                     if Projectwise == 'year':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1309,9 +1344,9 @@ class ProfitLossCustomReport(models.TransientModel):
                             if p in mainlist_position:
                                 for i in range(len(main_list)):
                                     if main_list[i]['year'] == p and main_list[i]['account_name'] == new_list[k]['account_name']:
-                                        worksheet.write(row, v, main_list[i]['balance'],floatstyle)
+                                        worksheet.write(row, v, main_list[i]['balance'], floatstyle)
                             else:
-                                worksheet.write(row, v,000,rightfont)
+                                worksheet.write(row, v, 00.0, rightfont)
 
                     if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
                         for values in range(len(news_list)):
@@ -1335,27 +1370,27 @@ class ProfitLossCustomReport(models.TransientModel):
         row+=1
         worksheet.write(row,1, 'Total Depreciation', style = mainheaders)
         worksheet.write(row,2, Depreciation, style = mainheaderdata)
-        worksheet.write(row,3, DepPercentage, style = mainheaderdatas)
+        worksheet.write(row,3,round((DepPercentage),1), style = mainheaderdatas)
         col = 4
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             if resdepriciation:
                 for j in range(len(resdepriciation)):
-                    worksheet.write(row, col,resdepriciation[j], mainheaderdata)
+                    worksheet.write(row, col, resdepriciation[j], mainheaderdata)
                     col+=1
             else:
                 for p,v in ColIndexes.items():
-                    worksheet.write(row, col,000,mainheaderdata)
+                    worksheet.write(row, col, 00.0, mainheaderdata)
                     col+=1
     
         row +=1
         worksheet.write(row,0, 'Total Expenses', style = mainheader)
         worksheet.write(row,1, '', style = mainheaderline)
         worksheet.write(row,2, TotalExpenses, style = mainheaderline)
-        worksheet.write(row,3, (TotalExpenses*100/OperatingIncome),  style = mainheaderline)
+        worksheet.write(row,3, round((TotalExpenses*100/OperatingIncome),1),  style = mainheaderline)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             for i in range(0,len(finalexpense_list)):
-                worksheet.write(row, col,finalexpense_list[i],style = mainheaderline)
+                worksheet.write(row, col, finalexpense_list[i], style = mainheaderline)
                 col+=1
            
         row +=1
@@ -1366,14 +1401,14 @@ class ProfitLossCustomReport(models.TransientModel):
         else :
             worksheet.write(row,2, '', style = netmainheader)
         if NetProfit > 0:
-            worksheet.write(row,3, (NetProfit*100/OperatingIncome), style = netmainheader)
+            worksheet.write(row,3, round((NetProfit*100/OperatingIncome),1) , style = netmainheader)
         else:
             worksheet.write(row,3, '', style = netmainheader)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             for i in range(len(netbalance_list)):
                 if netbalance_list[i] > 0:
-                    worksheet.write(row, col,netbalance_list[i],style = netmainheader)
+                    worksheet.write(row, col, netbalance_list[i], style = netmainheader)
                 else:
                     worksheet.write(row,col, '', style = netmainheader)
 

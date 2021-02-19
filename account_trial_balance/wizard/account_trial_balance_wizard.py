@@ -871,9 +871,9 @@ class AccountTrialBalanceReport(models.TransientModel):
                             col = 2
                             for j in range(len(acc_balance)):
                                 if acc_balance[j]['name'] == 0.0:
-                                    worksheet.write(row, col, "0", mainheaderdata)
+                                    worksheet.write(row, col, 00.0, mainheaderdata)
                                 else:    
-                                    worksheet.write(row, col, self.format_value(acc_balance[j]['name']), mainheaderdata)
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaderdata)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
@@ -881,13 +881,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                                     col = 9
                                     for j in range(len(projects)):
 
-                                        worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
                             elif self.dimension_wise_project == 'month':
@@ -895,14 +895,14 @@ class AccountTrialBalanceReport(models.TransientModel):
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(months)):
-                                        # self.format_value(list(months[j].values())[0])
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaderdata)
+                                        
+                                        worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
 
@@ -915,22 +915,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                             col = 2
                             for j in range(len(acc_balance)):
                                 if acc_balance[j]['name'] == 0.0:
-                                    worksheet.write(row, col, "0", mainheaders)
+                                    worksheet.write(row, col, 00.0, mainheaders)
                                 else:    
-                                    worksheet.write(row, col, self.format_value(acc_balance[j]['name']),mainheaders)
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaders)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,format_value(list(projects[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,format_value(list(projects[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
                             elif self.dimension_wise_project == 'month':
@@ -938,13 +938,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col, round((list(months[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
 
@@ -961,22 +961,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                             col = 2
                             for j in range(len(acc_balance)):
                                 if acc_balance[j]['name'] == 0.0:
-                                    worksheet.write(row, col, "0", mainheaderdata)
+                                    worksheet.write(row, col, 00.0, mainheaderdata)
                                 else:    
-                                    worksheet.write(row, col, self.format_value(acc_balance[j]['name']),mainheaderdata)
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaderdata)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
                             elif self.dimension_wise_project == 'month':
@@ -984,13 +984,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col, round((list(months[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaderdata)
+                                        worksheet.write(row, col, round((list(months[j].values())[0]),1), mainheaderdata)
                                         col+=1
                                     row+=1
 
@@ -1003,22 +1003,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                             col = 2
                             for j in range(len(acc_balance)):
                                 if acc_balance[j]['name'] == 0.0:
-                                    worksheet.write(row, col, "0", mainheaders)
+                                    worksheet.write(row, col, 00.0, mainheaders)
                                 else:    
-                                    worksheet.write(row, col, self.format_value(acc_balance[j]['name']),mainheaders)
+                                    worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaders)
                                 col+=1
                             if self.dimension_wise_project == 'dimension':
                                 projects = new_lines[i]['project']
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(projects)):
-                                        worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
                             elif self.dimension_wise_project == 'month':
@@ -1026,13 +1026,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                                 if self.show_dr_cr_separately:
                                     col = 9
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
                                 else:
                                     col = 7
                                     for j in range(len(months)):
-                                        worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaders)
+                                        worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaders)
                                         col+=1
                                     row+=1
 
@@ -1058,22 +1058,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                         col = 2
                         for j in range(len(acc_balance)):
                             if acc_balance[j]['name'] == 0.0:
-                                worksheet.write(row, col, '0', mainheaderdata)
+                                worksheet.write(row, col, 00.0, mainheaderdata)
                             else:
-                                worksheet.write(row, col, self.format_value(acc_balance[j]['name']), mainheaderdata)
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaderdata)
                             col+=1
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                    worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaderdata)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                    worksheet.write(row, col, round((list(projects[j].values())[0]),1), mainheaderdata)
                                     col+=1
                                 row+=1
                         elif self.dimension_wise_project == 'month':
@@ -1100,22 +1100,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                         col = 2
                         for j in range(len(acc_balance)):
                             if acc_balance[j]['name'] == 0.0:
-                                worksheet.write(row, col, '0', mainheaders)
+                                worksheet.write(row, col, 00.0, mainheaders)
                             else:    
-                                worksheet.write(row, col, self.format_value(acc_balance[j]['name']), mainheaders)
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaders)
                             col+=1
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaders)
+                                    worksheet.write(row, col, round((list(projects[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaders)
+                                    worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
                         elif self.dimension_wise_project == 'month':
@@ -1123,13 +1123,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(months)):
-                                    worksheet.write(row, col,format_value((list(months[j].values())[0])), mainheaders)
+                                    worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(months)):
-                                    worksheet.write(row, col,self.format_value((list(months[j].values())[0])), mainheaders)
+                                    worksheet.write(row, col, round((list(months[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
 
@@ -1146,22 +1146,22 @@ class AccountTrialBalanceReport(models.TransientModel):
                         col = 2
                         for j in range(len(acc_balance)):
                             if acc_balance[j]['name'] == 0.0:
-                                worksheet.write(row, col, '0', mainheaderdata)
+                                worksheet.write(row, col, 00.0, mainheaderdata)
                             else:    
-                                worksheet.write(row, col, self.format_value(acc_balance[j]['name']),mainheaderdata)
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaderdata)
                             col+=1
                         if self.dimension_wise_project == 'dimension':
                             projects = new_lines[i]['project']
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                    worksheet.write(row, col, round((list(projects[j].values())[0]),1), mainheaderdata)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaderdata)
+                                    worksheet.write(row, col, round((list(projects[j].values())[0]),1), mainheaderdata)
                                     col+=1
                                 row+=1
                         elif self.dimension_wise_project == 'month':
@@ -1169,13 +1169,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(months)):
-                                    worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaderdata)
+                                    worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaderdata)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(months)):
-                                    worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaderdata)
+                                    worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaderdata)
                                     col+=1
                                 row+=1
 
@@ -1188,9 +1188,9 @@ class AccountTrialBalanceReport(models.TransientModel):
                         col = 2
                         for j in range(len(acc_balance)):
                             if acc_balance[j]['name'] == 0.0 or acc_balance[j]['name'] == 0:
-                                worksheet.write(row, col, '0', mainheaders)
+                                worksheet.write(row, col, 00.0, mainheaders)
                             else:    
-                                worksheet.write(row, col, self.format_value(acc_balance[j]['name']), mainheaders)
+                                worksheet.write(row, col, round((acc_balance[j]['name']),1), mainheaders)
                             col+=1
                             
                         if self.dimension_wise_project == 'dimension':
@@ -1198,13 +1198,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaders)
+                                    worksheet.write(row, col,round((list(projects[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(projects)):
-                                    worksheet.write(row, col,self.format_value(list(projects[j].values())[0]), mainheaders)
+                                    worksheet.write(row, col, round((list(projects[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
                         elif self.dimension_wise_project == 'month':
@@ -1212,13 +1212,13 @@ class AccountTrialBalanceReport(models.TransientModel):
                             if self.show_dr_cr_separately:
                                 col = 9
                                 for j in range(len(months)):
-                                    worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaders)
+                                    worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
                             else:
                                 col = 7
                                 for j in range(len(months)):
-                                    worksheet.write(row, col,self.format_value(list(months[j].values())[0]), mainheaders)
+                                    worksheet.write(row, col,round((list(months[j].values())[0]),1), mainheaders)
                                     col+=1
                                 row+=1
 
