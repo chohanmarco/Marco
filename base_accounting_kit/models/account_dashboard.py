@@ -47,7 +47,6 @@ class DashBoard(models.Model):
             query = '''select sum(debit)-sum(credit) as income ,to_char(account_move_line.date, 'Month')  as month ,
                              internal_group from account_move_line ,account_account where 
                              account_move_line.account_id=account_account.id AND internal_group = 'income' 
-                             AND to_char(DATE(NOW()), 'YY') = to_char(account_move_line.date, 'YY')
                              AND account_move_line.company_id in ''' + str(tuple(company_id)) + '''
                              AND account_move_line.analytic_account_id = ''' + analytic_account + ''' 
                              AND %s AND account_move_line.date BETWEEN %%s AND %%s 
@@ -59,7 +58,6 @@ class DashBoard(models.Model):
             query = '''select sum(debit)-sum(credit) as expense ,to_char(account_move_line.date, 'Month')  as month ,
                                 internal_group from account_move_line ,account_account where 
                                 account_move_line.account_id=account_account.id AND internal_group = 'expense' 
-                                AND to_char(DATE(NOW()), 'YY') = to_char(account_move_line.date, 'YY')
                                 AND account_move_line.company_id in ''' + str(tuple(company_id)) + '''
                                 AND account_move_line.analytic_account_id = ''' + analytic_account + ''' 
                                 AND %s AND account_move_line.date BETWEEN %%s AND %%s
@@ -71,7 +69,6 @@ class DashBoard(models.Model):
             query = '''select sum(debit)-sum(credit) as income ,to_char(account_move_line.date, 'Month')  as month ,
                                  internal_group from account_move_line ,account_account where 
                                  account_move_line.account_id=account_account.id AND internal_group = 'income' 
-                                 AND to_char(DATE(NOW()), 'YY') = to_char(account_move_line.date, 'YY')
                                  AND account_move_line.company_id in ''' + str(tuple(company_id)) + '''
                                  AND %s AND account_move_line.date BETWEEN %%s AND %%s 
                                  group by internal_group,month                  
@@ -82,7 +79,6 @@ class DashBoard(models.Model):
             query = '''select sum(debit)-sum(credit) as expense ,to_char(account_move_line.date, 'Month')  as month ,
                                 internal_group from account_move_line ,account_account where 
                                 account_move_line.account_id=account_account.id AND internal_group = 'expense' 
-                                AND to_char(DATE(NOW()), 'YY') = to_char(account_move_line.date, 'YY')
                                 AND account_move_line.company_id in ''' + str(tuple(company_id)) + '''
                                 AND %s AND account_move_line.date BETWEEN %%s AND %%s
                                 group by internal_group,month
@@ -614,7 +610,7 @@ class DashBoard(models.Model):
                             invoice_payment_state = 'not_paid' AND 
                             %s
                             AND   account_move.company_id in ''' + str(tuple(company_id)) + ''' AND
-			                 account_move_line.account_internal_type = 'payable' AND
+                             account_move_line.account_internal_type = 'payable' AND
                              account_move.commercial_partner_id=res_partner.commercial_partner_id 
                             group by parent,partner,res
                             order by amount desc
