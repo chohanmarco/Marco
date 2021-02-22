@@ -353,7 +353,7 @@ class ProfitLossCustomReport(models.TransientModel):
         styleheader = xlwt.easyxf('font: bold 1, colour black, height 300;')
         stylecolumnheader = xlwt.easyxf('font: bold 1, colour black, height 200;pattern: pattern solid, fore_colour gainsboro')
         linedata = xlwt.easyxf('align: horiz right;')
-        alinedata = xlwt.easyxf('align: horiz left;','#,##.00')
+        alinedata = xlwt.easyxf('align: horiz left;borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;','#.00')
         stylecolaccount = xlwt.easyxf('font: bold 1, colour white, height 200; \
                                       pattern: pattern solid, fore_colour dark_blue; \
                                       align: vert centre, horiz centre;')
@@ -364,11 +364,11 @@ class ProfitLossCustomReport(models.TransientModel):
         dateheader = xlwt.easyxf('font: bold 1, colour black, height 200;')
         maintotal = xlwt.easyxf('font: bold 1, colour black, height 200;')
         finaltotalheader = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour black; align: horiz right;')
-        rightfont = xlwt.easyxf('pattern: fore_color white; align: horiz right;')
-        floatstyle = xlwt.easyxf("align: horiz right;","#,##0.00")
+        rightfont = xlwt.easyxf('pattern: fore_color white; align: horiz right;borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;',"#.00")
+        floatstyle = xlwt.easyxf("align: horiz right;borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;","#.00")
         finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black;")
         accountnamestyle = xlwt.easyxf('font: bold 1, colour green, height 200;')
-        mainheaders = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz left;')
+        mainheaders = xlwt.easyxf('pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz left;borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;',"#.00")
         mainheader = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
                                  font: bold 1, colour dark_blue; align: horiz left;')
         mainheaderexpense = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
@@ -381,9 +381,10 @@ class ProfitLossCustomReport(models.TransientModel):
                                  font: bold 1, colour dark_blue; align: horiz left;borders: bottom_color black,\
                               bottom double;')
         mainheaderline = xlwt.easyxf("pattern: pattern solid, fore_colour gainsboro; \
-                                 font: bold 1, colour dark_blue; align: horiz right;")
-        mainheaderdata = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;")
-        mainheaderdatas = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;")
+                                 font: bold 1, colour dark_blue; align: horiz right;","#.00")
+        mainheaderdata = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;","#.00")
+        mainheaderdatas = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right;borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;","#.00")
+
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 22
         first_col = worksheet.col(1)
@@ -952,7 +953,7 @@ class ProfitLossCustomReport(models.TransientModel):
                     worksheet.write(row, 0, new_list[k]['account_code'],alinedata)
                     worksheet.write(row, 1, new_list[k]['account_name'],alinedata)
                     worksheet.write(row, 2, abs(new_list[k]['balance']),floatstyle)
-                    worksheet.write(row, 3, abs(percentage),linedata)
+                    worksheet.write(row, 3, abs(percentage),floatstyle)
                     if Projectwise == 'dimension':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1135,7 +1136,7 @@ class ProfitLossCustomReport(models.TransientModel):
 
         row+=1
         worksheet.write(row,1, 'Total Other Income', style = mainheaders)
-        worksheet.write(row,2, abs(OtherIncome), style = mainheaderdata )
+        worksheet.write(row,2, abs(OtherIncome), style = mainheaderdata)
         worksheet.write(row,3, round((00.0),1), style = mainheaderdatas)
         col = 4
         if Projectwise == 'dimension':

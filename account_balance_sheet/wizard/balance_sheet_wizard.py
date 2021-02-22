@@ -1303,6 +1303,7 @@ class BalanceSheetReport(models.TransientModel):
                     elif mainDict[j]['account_id'] not in check_ids:
                         mainDict[j]['projects'] = columns
 
+        
         import base64
         dateFrom = self.date_from
         dateTo = self.date_to
@@ -1357,7 +1358,7 @@ class BalanceSheetReport(models.TransientModel):
         borders: top_color black, bottom_color black, right_color black, left_color black, \
         left thin, right thin, top thin, bottom thin;')
         floatstyle = xlwt.easyxf("borders: top_color black, bottom_color black, right_color black, left_color black, \
-        left thin, right thin, top thin, bottom thin;")
+        left thin, right thin, top thin, bottom thin;","#.00")
         finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black; \
         borders: top_color black, bottom_color black, right_color black, left_color black, \
         left thin, right thin, top thin, bottom thin;")
@@ -1369,12 +1370,12 @@ class BalanceSheetReport(models.TransientModel):
                               left thin, right thin, top thin, bottom thin;')
         mainheaderlinedata = xlwt.easyxf('pattern: pattern solid, fore_colour gainsboro; \
                                  font: bold 1, colour dark_blue; align: horiz right; borders: top_color black, bottom_color black, right_color black, left_color black,\
-                              left thin, right thin, top thin, bottom thin;')
+                              left thin, right thin, top thin, bottom thin;',"#.00")
         mainheaderline = xlwt.easyxf("pattern: pattern solid, fore_colour gainsboro; \
                                  font: bold 1, colour dark_blue; align: horiz right; borders: top_color black, bottom_color black, right_color black, left_color black,\
                               left thin, right thin, top thin, bottom thin;")
-        mainheaderdata = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right; borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;")
-        mainheaderdatas = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right; borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;")
+        mainheaderdata = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right; borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;","#.00")
+        mainheaderdatas = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour dark_blue; align: horiz right; borders: top_color black, bottom_color black, right_color black, left_color black,left thin, right thin, top thin, bottom thin;","#.00")
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 22
         first_col = worksheet.col(1)
@@ -1488,17 +1489,19 @@ class BalanceSheetReport(models.TransientModel):
         TotalBankCash = 0.0
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Bank and Cash':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalBankCash += mainDict[s]['balance']
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
-                worksheet.write(row, 2, round((mainDict[s]['balance']),1),floatstyle)
+                worksheet.write(row, 2, round((mainDict[s]['balance']),2),floatstyle)
                 if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
                     col = 3
                     if mainDict[s]['projects']:
                         listd = []
                         acc_projects = mainDict[s]['projects']
                         for pr in acc_projects:
-                            worksheet.write(row, col,round((list(pr.values())[0]),1), style = floatstyle)
+                            worksheet.write(row, col,round((list(pr.values())[0]),2), style = floatstyle)
                             col+=1
                         listd = [list(c.values())[0] for c in acc_projects]
                         Bank_total_list.append(listd)
@@ -1514,16 +1517,16 @@ class BalanceSheetReport(models.TransientModel):
         current_assets_lists.append(incomeres)
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Total Bank and Cash Accounts', style = mainheaders)
-        worksheet.write(row, 2,round((TotalBankCash),1), style = mainheaderdata)
+        worksheet.write(row, 2,round((TotalBankCash),2), style = mainheaderdata)
         col = 3
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             if incomeres:
                 for j in range(len(incomeres)):
-                    worksheet.write(row, col, round((incomeres[j]),1), mainheaderdata)
+                    worksheet.write(row, col, round((incomeres[j]),2), mainheaderdata)
                     col+=1
             else:
                 for p,v in ColIndexes.items():
-                    worksheet.write(row, col, round((00.0),1),mainheaderdata)
+                    worksheet.write(row, col, round((00.0),2),mainheaderdata)
                     col+=1
         row +=1
         worksheet.write(row, 0,'', style = mainheaders)
@@ -1539,6 +1542,8 @@ class BalanceSheetReport(models.TransientModel):
         Rec_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Receivable':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalReceivable += mainDict[s]['balance']
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
@@ -1591,6 +1596,8 @@ class BalanceSheetReport(models.TransientModel):
         Current_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Current Assets':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalCurrentAsset += mainDict[s]['balance']
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
@@ -1669,6 +1676,8 @@ class BalanceSheetReport(models.TransientModel):
         Fixed_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Fixed Assets':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalFixedAssets += mainDict[s]['balance']
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
@@ -1760,6 +1769,8 @@ class BalanceSheetReport(models.TransientModel):
         Liabilities_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Current Liabilities':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalCurrentLiability += abs(mainDict[s]['balance'])
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
@@ -1812,6 +1823,8 @@ class BalanceSheetReport(models.TransientModel):
         Payables_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Payable':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalPayables += abs(mainDict[s]['balance'])
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
@@ -1928,6 +1941,8 @@ class BalanceSheetReport(models.TransientModel):
         Earnings_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Current Year Earnings':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 if mainDict[s]['account_name'] == 'Current Year Earnings':
                     if netcurrentyear == 0.0:
                         TotalCurrentYearEarnings += 0.0
@@ -1996,10 +2011,12 @@ class BalanceSheetReport(models.TransientModel):
             worksheet.write(row, 2,0.0, style = mainheaderdata)
         else:
             worksheet.write(row, 2,round((TotalCurrentYearEarnings),1), style = mainheaderdata)
-        col = 3
         if Projectwise == 'month' or Projectwise == 'year':
+            col = 3
             if netcurrentyear == 0.0:
-                worksheet.write(row, col, 0,mainheaderdata)
+                for p,v in ColIndexes.items():
+                    worksheet.write(row, col, round((00.0),1),mainheaderdata)
+                    col+=1
             else:
                 if earningsres:
                     for j in range(len(earningsres)):
@@ -2069,6 +2086,8 @@ class BalanceSheetReport(models.TransientModel):
         Equity_total_list = []
         for s in range(len(mainDict)):
             if mainDict[s]['account_type'] == 'Equity':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
                 TotalRetainedEarnings += abs(mainDict[s]['balance'])
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
@@ -2163,5 +2182,3 @@ class balance_sheet_export_excel(models.TransientModel):
 
     excel_file = fields.Binary('Report for Balance Sheet')
     file_name = fields.Char('File', size=64)
-
-
