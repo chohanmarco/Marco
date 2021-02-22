@@ -6,7 +6,7 @@
         Balance Sheet""",
 
     'description': """
-        Add Balance Sheet report in PDF and Xls Format
+        Add Balance Sheet report in PDF and Xls Format..
     """,
 
     'author': "My Company",
