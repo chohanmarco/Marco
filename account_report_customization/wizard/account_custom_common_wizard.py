@@ -342,10 +342,10 @@ class AccountCustomReport(models.TransientModel):
         borders: top_color black, bottom_color black, right_color black, left_color black, \
         left thin, right thin, top thin, bottom thin;')
         floatstyle = xlwt.easyxf("borders: top_color black, bottom_color black, right_color black, left_color black, \
-        left thin, right thin, top thin, bottom thin;", "#,###.00")
+        left thin, right thin, top thin, bottom thin;", "#,##0.00")
         finaltotalheaderbold = xlwt.easyxf("pattern: fore_color white; font: bold 1, colour black; \
         borders: top_color black, bottom_color black, right_color black, left_color black, \
-        left thin, right thin, top thin, bottom thin;", "#,###.00")
+        left thin, right thin, top thin, bottom thin;", "#,##0.00")
         zero_col = worksheet.col(0)
         zero_col.width = 236 * 22
         first_col = worksheet.col(1)
