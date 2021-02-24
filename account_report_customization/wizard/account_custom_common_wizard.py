@@ -50,17 +50,29 @@ class AccountCustomReport(models.TransientModel):
             
         Status = ['posted']
         MoveLines = []
-        self.env.cr.execute("""
-            SELECT aml.id
-            FROM account_move_line aml
-            LEFT JOIN account_move am ON (am.id=aml.move_id)
-            WHERE (aml.date >= %s) AND
-                (aml.date <= %s) AND
-                (aml.account_id in %s) AND
-                (aml.analytic_account_id in %s) AND
-                (am.state in %s) ORDER BY aml.date""",
-            (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple(AccountIds), tuple(AnalyticAccountIds), tuple(Status),))
-        MoveLines = [x[0] for x in self.env.cr.fetchall()]
+        if self.dimension_wise_project:
+            self.env.cr.execute("""
+                SELECT aml.id
+                FROM account_move_line aml
+                LEFT JOIN account_move am ON (am.id=aml.move_id)
+                WHERE (aml.date >= %s) AND
+                    (aml.date <= %s) AND
+                    (aml.account_id in %s) AND
+                    (aml.analytic_account_id in %s) AND
+                    (am.state in %s) """,
+                (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple(AccountIds), tuple(AnalyticAccountIds), tuple(Status),))
+            MoveLines = [x[0] for x in self.env.cr.fetchall()]
+        else:
+            self.env.cr.execute("""
+                SELECT aml.id
+                FROM account_move_line aml
+                LEFT JOIN account_move am ON (am.id=aml.move_id)
+                WHERE (aml.date >= %s) AND
+                    (aml.date <= %s) AND
+                    (aml.account_id in %s) AND
+                    (am.state in %s) """,
+                (str(dateFrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple(AccountIds), tuple(Status),))
+            MoveLines = [x[0] for x in self.env.cr.fetchall()]            
         action['context'] = {'create': False}
         action['domain'] = [('id', 'in', MoveLines)]
         return action   
@@ -154,8 +166,12 @@ class AccountCustomReport(models.TransientModel):
 
     def get_initials(self,account):
         AccountAccountObj = self.env['account.account']
+        AccountTypeObj = self.env['account.account.type']
         Account = AccountAccountObj.search([('name','=',account)])
+        ExcludeTypes = AccountTypeObj.search([('name','in',['Expenses','Depreciation','Cost of Revenue'])])
         Status = ['posted']
+        if Account.user_type_id.id in ExcludeTypes.ids:
+            return 0,0,0
         if Account:
             self.env.cr.execute("""
                 SELECT sum(aml.debit)
