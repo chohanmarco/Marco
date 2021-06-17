@@ -634,6 +634,7 @@ class ProfitLossCustomReport(models.TransientModel):
             thirdincomelist = [sum(i) for i in zip(*thirdincomelists)]
             thirdcostlist = [sum(i) for i in zip(*thirdcostlists)]
             thirdotherlist = [sum(i) for i in zip(*thirdotherlists)]
+            print("thirdotherlist==",thirdotherlist)
             thirdexpenselist = [sum(i) for i in zip(*thirdexpenselists)]
             thirddepriciationlist = [sum(i) for i in zip(*thirddepriciationlists)]
 
@@ -646,7 +647,9 @@ class ProfitLossCustomReport(models.TransientModel):
                     finalgross_list.append(thirdincomelist[i])
 
             for i in range(0,len(finalgross_list)):
-                if finalgross_list and thirdotherlist[i]:
+                print("finalgross_list==",len(finalgross_list))
+                # print("thirdotherlist===",thirdotherlist.append())
+                if len(finalgross_list)>0 and len(thirdotherlist)>0:
                     finalincome_list.append(finalgross_list[i] + thirdotherlist[i])
                 elif finalgross_list:
                     finalincome_list.append(finalgross_list[i])
