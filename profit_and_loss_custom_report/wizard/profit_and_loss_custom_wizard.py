@@ -829,7 +829,7 @@ class ProfitLossCustomReport(models.TransientModel):
                     finalgross_list.append(thirdincomelist[i])
 
             for i in range(0,len(finalgross_list)):
-                if len(finalgross_list)> and len(thirdotherlist)>0:
+                if len(finalgross_list)>0 and len(thirdotherlist)>0:
                     finalincome_list.append(finalgross_list[i] + thirdotherlist[i])
                 elif finalgross_list:
                     finalincome_list.append(finalgross_list[i])
