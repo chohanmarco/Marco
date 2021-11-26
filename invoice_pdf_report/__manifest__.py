@@ -20,7 +20,8 @@
     'data': [
         'report/report_invoice_marco.xml',
         'views/account_move_custom_view.xml',
-        'views/res_company_view.xml'
+        'views/res_company_view.xml',
+        'views/partner_view.xml',
     ],
     'qweb': [],
     'installable': True,
