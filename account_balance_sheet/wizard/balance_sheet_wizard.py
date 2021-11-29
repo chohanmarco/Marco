@@ -122,7 +122,6 @@ class BalanceSheetReport(models.TransientModel):
                 (str(earningdatefrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
 
             EarningLineIds = self.env.cr.fetchall()
-
             if EarningLineIds:
                 for er in EarningLineIds:
                     date = er[0]
@@ -956,6 +955,11 @@ class BalanceSheetReport(models.TransientModel):
         previousyearotherincome = 0.0
         previousyeardepriciation = 0.0
         netpreviousyearexpenses = 0.0
+        curryearincome = 0.0
+        curryearcost = 0.0
+        curryearotherincome = 0.0
+        curryeardepriciation = 0.0
+        curryearexpenses = 0.0
         netpreviousyear = 0.0
         netcurrentyear = 0.0
         for Account in self.env['account.account'].browse(AccountIds):
@@ -979,9 +983,7 @@ class BalanceSheetReport(models.TransientModel):
                     (aml.account_id in %s) AND
                     (am.state in %s) ORDER BY aml.date""",
                 (str(earningdatefrom) + ' 00:00:00', str(dateTo) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
-
             EarningLineIds = self.env.cr.fetchall()
-
             if EarningLineIds:
                 for er in EarningLineIds:
                     date = er[0]
@@ -1006,96 +1008,109 @@ class BalanceSheetReport(models.TransientModel):
                     earningsDict.append(Vals)
 
         for i in range(len(earningsDict)):
-
             if earningsDict[i]['account_type'] == "Income" :
-                previousyearincome += earningsDict[i]['balance']
-
+                curryearincome += earningsDict[i]['balance']
             if earningsDict[i]['account_type'] == "Cost of Revenue":
-                previousyearcost += earningsDict[i]['balance']
-                
+                curryearcost += earningsDict[i]['balance']
             if earningsDict[i]['account_type'] == "Other Income" :
-                previousyearotherincome += earningsDict[i]['balance']
-                
+                curryearotherincome += earningsDict[i]['balance']
             if earningsDict[i]['account_type'] == "Expenses" :
-                previousyearexpenses += earningsDict[i]['balance']
-
+                curryearexpenses += earningsDict[i]['balance']
             if earningsDict[i]['account_type'] == "Depreciation":
-                previousyeardepriciation += earningsDict[i]['balance']
+                curryeardepriciation += earningsDict[i]['balance']
 
+        netcurryearincome = (abs(curryearincome) - curryearcost) + abs(curryearotherincome)
+
+        netcurryearexpenses = curryearexpenses + curryeardepriciation
+
+        netcurrentyear = netcurryearincome - netcurryearexpenses
+
+        current_year_allocated_balance = 0.0
+        current_year_allocated_move_lines = self.env['account.move.line'].search([('account_id','=','Undistributed Profit'),('date','=',dateTo)])
+        if current_year_allocated_move_lines:
+            current_year_allocated_balance = current_year_allocated_move_lines.debit - current_year_allocated_move_lines.credit
+            if not current_year_allocated_balance:
+                current_year_allocated_balance = 0.0
+        
+        # if netcurrentyear == 0.0:
+        journal_entries = []
+        previousearningsDict = []
+        for Account in self.env['account.account'].browse(AccountIds):
+            Balance = 0.0
+            # Journal Entries
+            self.env.cr.execute("""
+                SELECT aml.date as date,
+                       aml.debit as debit,
+                       aml.credit as credit,
+                       a.code as code,
+                       a.name as acc_name,
+                       at.name as acc_type,
+                       aa.name as analytic,
+                       aml.id as movelineid
+                FROM account_move_line aml
+                LEFT JOIN account_move am ON (am.id=aml.move_id)
+                LEFT JOIN account_account a ON (a.id=aml.account_id)
+                LEFT JOIN account_account_type at ON (at.id=a.user_type_id)
+                LEFT JOIN account_analytic_account aa ON (aa.id=aml.analytic_account_id)
+                WHERE (aml.date >= %s) AND
+                    (aml.date <= %s) AND
+                    (aml.account_id in %s) AND
+                    (am.state in %s) ORDER BY aml.date""",
+                    (str(previousfromdate) + ' 00:00:00', str(previoustodate) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
+            journal_entries = self.env.cr.fetchall()
+            
+            if journal_entries:
+                for er in journal_entries:
+                    date = er[0]
+                    acount_debit = er[1]
+                    account_credit = er[2]
+                    account_code = er[3]
+                    account_name = er[4]
+                    account_type = er[5]
+                    analytic_account_id = er[6]
+                    Balance = 0.0
+                    Balance = Balance + (acount_debit - account_credit)
+                    Vals = {'account_code':account_code,
+                            'account_name':account_name,
+                            'balance': Balance or 0.0,
+                            'percentage': 0.0,
+                            'account_type':account_type,
+                            'account_debit':acount_debit,
+                            'account_credit':account_credit,
+                            'analytic_account_id':analytic_account_id,
+                            'date':date,
+                            }
+                    previousearningsDict.append(Vals)
+        
+        for i in range(len(previousearningsDict)):
+            if previousearningsDict[i]['account_type'] == "Income" :
+                previousyearincome += previousearningsDict[i]['balance']
+
+            if previousearningsDict[i]['account_type'] == "Cost of Revenue":
+                previousyearcost += previousearningsDict[i]['balance']
+                
+            if previousearningsDict[i]['account_type'] == "Other Income" :
+                previousyearotherincome += previousearningsDict[i]['balance']
+                
+            if previousearningsDict[i]['account_type'] == "Expenses" :
+                previousyearexpenses += previousearningsDict[i]['balance']
+
+            if previousearningsDict[i]['account_type'] == "Depreciation":
+                previousyeardepriciation += previousearningsDict[i]['balance']
+        
         netpreviousyearincome = (abs(previousyearincome) - previousyearcost) + abs(previousyearotherincome)
 
         netpreviousyearexpenses = previousyearexpenses + previousyeardepriciation
 
-        netcurrentyear = netpreviousyearincome - netpreviousyearexpenses
+        netpreviousyear = netpreviousyearincome - netpreviousyearexpenses
+        
+        account_move_lines = self.env['account.move.line'].search([('account_id','=','Undistributed Profit'),('date','=',previoustodate)])
+        if account_move_lines:
+            move_line_balance = account_move_lines.debit - account_move_lines.credit
+            if round((netpreviousyear),2) == move_line_balance:
+                netpreviousyear = 0.0
 
-        if netcurrentyear == 0.0:
-            for Account in self.env['account.account'].browse(AccountIds):
-                Balance = 0.0
-                self.env.cr.execute("""
-                    SELECT aml.date as date,
-                           aml.debit as debit,
-                           aml.credit as credit,
-                           a.code as code,
-                           a.name as acc_name,
-                           at.name as acc_type,
-                           aa.name as analytic,
-                           aml.id as movelineid
-                    FROM account_move_line aml
-                    LEFT JOIN account_move am ON (am.id=aml.move_id)
-                    LEFT JOIN account_analytic_account aa ON (aa.id=aml.analytic_account_id)
-                    LEFT JOIN account_account a ON (a.id=aml.account_id)
-                    LEFT JOIN account_account_type at ON (at.id=a.user_type_id)
-                    WHERE (aml.date >= %s) AND
-                        (aml.date <= %s) AND
-                        (aml.account_id in %s) AND
-                        (am.state in %s) ORDER BY aml.date""",
-                    (str(previousfromdate) + ' 00:00:00', str(previoustodate) + ' 23:59:59', tuple([Account.id]), tuple(Status),))
-                EarningLineIds = self.env.cr.fetchall()
-                if EarningLineIds:
-                    for er in EarningLineIds:
-                        date = er[0]
-                        acount_debit = er[1]
-                        account_credit = er[2]
-                        account_code = er[3]
-                        account_name = er[4]
-                        account_type = er[5]
-                        analytic_account_id = er[6]
-                        Balance = 0.0
-                        Balance = Balance + (acount_debit - account_credit)
-                        Vals = {'account_code':account_code,
-                                'account_name':account_name,
-                                'balance': Balance or 0.0,
-                                'percentage': 0.0,
-                                'account_type':account_type,
-                                'account_debit':acount_debit,
-                                'account_credit':account_credit,
-                                'analytic_account_id':analytic_account_id,
-                                'date':date,
-                                }
-                        earningsDict.append(Vals)
-
-            for i in range(len(earningsDict)):
-
-                if earningsDict[i]['account_type'] == "Income" :
-                    previousyearincome += earningsDict[i]['balance']
-
-                if earningsDict[i]['account_type'] == "Cost of Revenue":
-                    previousyearcost += earningsDict[i]['balance']
-                    
-                if earningsDict[i]['account_type'] == "Other Income" :
-                    previousyearotherincome += earningsDict[i]['balance']
-                    
-                if earningsDict[i]['account_type'] == "Expenses" :
-                    previousyearexpenses += earningsDict[i]['balance']
-
-                if earningsDict[i]['account_type'] == "Depreciation":
-                    previousyeardepriciation += earningsDict[i]['balance']
-
-            netpreviousyearincome = (abs(previousyearincome) - previousyearcost) + abs(previousyearotherincome)
-
-            netpreviousyearexpenses = previousyearexpenses + previousyeardepriciation
-
-            netpreviousyear = netpreviousyearincome - netpreviousyearexpenses
+        netunallocatedearning = netpreviousyear + netcurrentyear
 
         for Account in self.env['account.account'].browse(AccountIds):
             Balance = 0.0
@@ -1120,7 +1135,6 @@ class BalanceSheetReport(models.TransientModel):
                 (str(dateTo) + ' 00:00:00', tuple([Account.id]), tuple(Status),))
 
             MoveLineIds = self.env.cr.fetchall()
-
             if MoveLineIds:
                 for ml in MoveLineIds:
                     account_id = ml[0]
@@ -1184,7 +1198,7 @@ class BalanceSheetReport(models.TransientModel):
                     mainDict[j]['account_code'] =  allData[i]['account_code']
                     mainDict[j]['account_name'] =  allData[i]['account_name']
                     mainDict[j]['account_type'] =  allData[i]['account_type']
-
+                    
         new_list = []
         columns = []
         check_ids = []
@@ -1208,7 +1222,7 @@ class BalanceSheetReport(models.TransientModel):
         allcoated_dict = []
         for j in range(len(mainDict)):
             if mainDict[j]['account_type'] == 'Current Year Earnings':
-                allocated_balance = mainDict[j]['balance']
+                allocated_balance = netcurrentyear
                 mainDict[j]['account_name'] = 'Current Year Earnings'
                 if netcurrentyear == 0.0 :
                     if res2:
@@ -1229,23 +1243,6 @@ class BalanceSheetReport(models.TransientModel):
                 if res2:
                     if mainDict[j]['account_type'] == 'Current Year Allocated Earnings':
                          mainDict[j]['projects'] = allcoated_dict
-          
-
-        # if self.dimension_wise_project == 'dimension':
-        #     AnalyticAccountsId = [i.id for i in AnalyticAccountIds]
-        #     ana_id = self.env['account.analytic.account'].browse(AnalyticAccountsId)
-        #     ac_names = [i.name for i in ana_id]
-        #     columns = [{i:00.0} for i in ac_names]
-        #     for i in range(len(new_list)):
-        #         check_ids.append(new_list[i]['account_id'])
-
-        #     for j in range(len(mainDict)):
-        #         for i in range(len(new_list)):
-        #             if mainDict[j]['account_id'] in check_ids:
-        #                 if new_list[i]['account_id'] == mainDict[j]['account_id']:
-        #                     mainDict[j]['projects'] =  new_list[i]['columns']
-        #             elif mainDict[j]['account_id'] not in check_ids:
-        #                 mainDict[j]['projects'] = columns
 
         fromdate = ''
         if self.dimension_wise_project == 'month':
@@ -1626,9 +1623,10 @@ class BalanceSheetReport(models.TransientModel):
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Total Current Assets', style = mainheaders)
         worksheet.write(row, 2,round((TotalCurrentAsset),1), style = mainheaderdata)
+        finalcurrentassets = [sum(i) for i in zip(*current_assets_lists)]
         col = 3
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
-            if receivableres:
+            if currentres:
                 for j in range(len(currentres)):
                     worksheet.write(row, col,round((currentres[j]),1), mainheaderdata)
                     col+=1
@@ -1646,9 +1644,53 @@ class BalanceSheetReport(models.TransientModel):
           elif i == col:
               break
         row +=1
-        finalcurrentassets = [sum(i) for i in zip(*current_assets_lists)]
+        TotalPrePayment = 0.0
+        pre_payment_total_list = []
+        for s in range(len(mainDict)):
+            if mainDict[s]['account_type'] == 'Prepayments':
+                if mainDict[s]['balance'] == 00.0:
+                    continue
+                TotalPrePayment += mainDict[s]['balance']
+                worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
+                worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
+                worksheet.write(row, 2, round((mainDict[s]['balance']),1),floatstyle)
+                if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
+                    col = 3
+                    if mainDict[s]['projects']:
+                        listd = []
+                        acc_projects = mainDict[s]['projects']
+                        for pr in acc_projects:
+                            worksheet.write(row, col,round((list(pr.values())[0]),1), style = floatstyle)
+                            col+=1
+                        listd = [list(c.values())[0] for c in acc_projects]
+                        pre_payment_total_list.append(listd)
+                    
+                row+=1
+        prepayments  = []
+        if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
+            if pre_payment_total_list:
+                for j in range(0, len(pre_payment_total_list[0])):
+                    tmp = 0
+                    for i in range(0, len(pre_payment_total_list)):
+                        tmp = tmp + pre_payment_total_list[i][j]
+                    prepayments.append(tmp)
+        pre_payment_total_list.append(prepayments)
+        worksheet.write(row, 0,'', style = mainheaders)
+        worksheet.write(row, 1,'Total Pre Payments', style = mainheaders)
+        worksheet.write(row, 2,round((TotalPrePayment),1), style = mainheaderdata)
+        col = 3
+        if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
+            if prepayments:
+                for j in range(len(prepayments)):
+                    worksheet.write(row, col,round((prepayments[j]),1), mainheaderdata)
+                    col+=1
+            else:
+                for p,v in ColIndexes.items():
+                    worksheet.write(row, col, round((00.0),1),mainheaderdata)
+                    col+=1
+        row +=1
         total_assets.append(finalcurrentassets)
-        TotalCurrentAssets = TotalBankCash + TotalReceivable + TotalCurrentAsset
+        TotalCurrentAssets = TotalBankCash + TotalReceivable + TotalCurrentAsset + TotalPrePayment
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Total Current Assets', style = mainheaders)
         worksheet.write(row, 2,round((TotalCurrentAssets),1), style = mainheaderdata)
@@ -1771,7 +1813,7 @@ class BalanceSheetReport(models.TransientModel):
             if mainDict[s]['account_type'] == 'Current Liabilities':
                 if mainDict[s]['balance'] == 00.0:
                     continue
-                TotalCurrentLiability += abs(mainDict[s]['balance'])
+                TotalCurrentLiability += mainDict[s]['balance']
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
                 worksheet.write(row, 2, round((abs(mainDict[s]['balance'])),1) ,floatstyle)
@@ -1798,7 +1840,7 @@ class BalanceSheetReport(models.TransientModel):
         total_current_libailities.append(liabilitiesres)
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Total Current Liabilities', style = mainheaders)
-        worksheet.write(row, 2,round((TotalCurrentLiability),1), style = mainheaderdata)
+        worksheet.write(row, 2,round(abs(TotalCurrentLiability),1), style = mainheaderdata)
         col = 3
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             if liabilitiesres:
@@ -1825,7 +1867,7 @@ class BalanceSheetReport(models.TransientModel):
             if mainDict[s]['account_type'] == 'Payable':
                 if mainDict[s]['balance'] == 00.0:
                     continue
-                TotalPayables += abs(mainDict[s]['balance'])
+                TotalPayables += mainDict[s]['balance']
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
                 worksheet.write(row, 2, round((abs(mainDict[s]['balance'])),1),floatstyle)
@@ -1851,7 +1893,7 @@ class BalanceSheetReport(models.TransientModel):
         total_current_libailities.append(liabilitiesres)
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Total Payables', style = mainheaders)
-        worksheet.write(row, 2,round((TotalPayables),1), style = mainheaderdata)
+        worksheet.write(row, 2,round(abs(TotalPayables),1), style = mainheaderdata)
         col = 3
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             if payablesres:
@@ -1939,24 +1981,36 @@ class BalanceSheetReport(models.TransientModel):
         row +=1
         TotalCurrentYearEarnings = 0.0
         Earnings_total_list = []
+            # print("mainDict[s]['account_name']====",mainDict[s]['account_name'])
+                # if mainDict[s]['balance'] == 00.0:
+                #     continue
+                # if mainDict[s]['account_name'] == 'Current Year Earnings':
+                #     print("netcurrentyear======",netcurrentyear)
+                #     if netcurrentyear == 0.0:
+                #         TotalCurrentYearEarnings += 0.0
+                #     else:
+                #         print("dateTo.strftime=====",dateTo.strftime("%Y"))
+                #         print("mainDict[j]['account_date'].strftime=======",mainDict[s]['account_date'].strftime("%Y"))
+                #         if dateTo.strftime("%Y") == mainDict[s]['account_date'].strftime("%Y"):
+
+                #             TotalCurrentYearEarnings += 0.0
+                #         else:
+                #             TotalCurrentYearEarnings = mainDict[s]['balance']
+        worksheet.write(row, 0, '9999',style = alinedata)
+        worksheet.write(row, 1, 'Current Year Earnings',style = alinedata)
+        worksheet.write(row, 2, netcurrentyear,style = floatstyle)
+        row +=1
+        worksheet.write(row, 0, '9999',style = alinedata)
+        worksheet.write(row, 1, 'Current Year Allocated Earnings',style = alinedata)
+        worksheet.write(row, 2, abs(current_year_allocated_balance),style = floatstyle)
+        row +=1
+        TotalCurrentYearEarnings = netcurrentyear + abs(current_year_allocated_balance)
         for s in range(len(mainDict)):
+            # if netcurrentyear == 0.0:
+            #     worksheet.write(row, 2, round((00.0),1),floatstyle)
+            # else:
+            #     worksheet.write(row, 2, round((mainDict[s]['balance']),1),floatstyle)
             if mainDict[s]['account_type'] == 'Current Year Earnings':
-                if mainDict[s]['balance'] == 00.0:
-                    continue
-                if mainDict[s]['account_name'] == 'Current Year Earnings':
-                    if netcurrentyear == 0.0:
-                        TotalCurrentYearEarnings += 0.0
-                    else:
-                        if dateTo.strftime("%Y") == mainDict[j]['account_date'].strftime("%Y"):
-                            TotalCurrentYearEarnings += 0.0
-                        else:
-                            TotalCurrentYearEarnings += mainDict[s]['balance']
-                worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
-                worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
-                if netcurrentyear == 0.0:
-                    worksheet.write(row, 2, round((00.0),1),floatstyle)
-                else:
-                    worksheet.write(row, 2, round((mainDict[s]['balance']),1),floatstyle)
                 if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
                     col = 3
                     acc_projects = mainDict[s]['projects']
@@ -1972,7 +2026,7 @@ class BalanceSheetReport(models.TransientModel):
                                     else:
                                         worksheet.write(row, col,list(pr.values())[0], style = floatstyle)
 
-                            if mainDict[s]['account_name'] == 'Current Year Allocated Earnings':
+                            if mainDict[s]['account_na me'] == 'Current Year Allocated Earnings':
                                 if netcurrentyear == 0.0:
                                     worksheet.write(row, col,0.0, style = floatstyle)
                                 else:
@@ -1991,8 +2045,7 @@ class BalanceSheetReport(models.TransientModel):
                             else:
                                 listd = [list(c.values())[0] for c in acc_projects]
                                 Earnings_total_list.append(listd)
-                          
-                row+=1
+                    row+=1
         earningsres  = []
         totalunallocatedearnings = []
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
@@ -2030,10 +2083,10 @@ class BalanceSheetReport(models.TransientModel):
         row +=1
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Previous Years Unallocated Earnings', style = mainheaders)
-        if netcurrentyear == 0.0:
-            worksheet.write(row, 2, round((netpreviousyear),1), style = mainheaderdata)
-        else:
-            worksheet.write(row, 2, 0.0, style = mainheaderdata)
+        worksheet.write(row, 2, round((netpreviousyear),1), style = mainheaderdata)
+        # if netcurrentyear == 0.0:
+        # else:
+        #     worksheet.write(row, 2, 0.0, style = mainheaderdata)
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             col = 3
             if netcurrentyear == 0.0:
@@ -2088,7 +2141,7 @@ class BalanceSheetReport(models.TransientModel):
             if mainDict[s]['account_type'] == 'Equity':
                 if mainDict[s]['balance'] == 00.0:
                     continue
-                TotalRetainedEarnings += abs(mainDict[s]['balance'])
+                TotalRetainedEarnings += (-mainDict[s]['balance'])
                 worksheet.write(row, 0, mainDict[s]['account_code'],alinedata)
                 worksheet.write(row, 1, mainDict[s]['account_name'],alinedata)
                 worksheet.write(row, 2, round((abs(mainDict[s]['balance'])),1),floatstyle)
@@ -2110,10 +2163,10 @@ class BalanceSheetReport(models.TransientModel):
                     for i in range(0, len(Equity_total_list)):
                         tmp = tmp + Equity_total_list[i][j]
                     equityres.append(tmp)
-        TotalEquity = TotalUnallocatedEarnings + abs(TotalRetainedEarnings)
+        TotalEquity = TotalUnallocatedEarnings + TotalRetainedEarnings
         worksheet.write(row, 0,'', style = mainheaders)
         worksheet.write(row, 1,'Total Retained Earnings', style = mainheaders)
-        worksheet.write(row, 2,round((abs(TotalRetainedEarnings)),1), style = mainheaderdata)
+        worksheet.write(row, 2,round((TotalRetainedEarnings),1), style = mainheaderdata)
         col = 3
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             if equityres:

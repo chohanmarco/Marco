@@ -494,7 +494,8 @@ class ProfitLossCustomReport(models.TransientModel):
                     if mainDict[i]['account_name'] == new_list[j]['account_name']:
                         new_list[j]['balance'] = new_list[j]['balance'] + mainDict[i]['balance']
 
-    
+        GrossProfitPercentage = 0.0
+        ExpensePercentage = 0.0
         for k in range(0,len(new_list)):
             try :
                 if  new_list[k]['account_type'] == "Income" :
@@ -634,7 +635,6 @@ class ProfitLossCustomReport(models.TransientModel):
             thirdincomelist = [sum(i) for i in zip(*thirdincomelists)]
             thirdcostlist = [sum(i) for i in zip(*thirdcostlists)]
             thirdotherlist = [sum(i) for i in zip(*thirdotherlists)]
-            print("thirdotherlist==",thirdotherlist)
             thirdexpenselist = [sum(i) for i in zip(*thirdexpenselists)]
             thirddepriciationlist = [sum(i) for i in zip(*thirddepriciationlists)]
 
@@ -921,7 +921,10 @@ class ProfitLossCustomReport(models.TransientModel):
         row+=1
         worksheet.write(row,1, 'Total Operating Income', style = mainheaders)
         worksheet.write(row,2, abs(OperatingIncome), style = mainheaderdata )
-        worksheet.write(row,3, abs(100), style = mainheaderdata)
+        if OperatingIncome == 0:
+            worksheet.write(row,3, abs(100), style = mainheaderdata)
+        else:
+            worksheet.write(row,3, abs(0.0), style = mainheaderdata)
         col = 4
         if Projectwise == 'dimension'or Projectwise == 'month' or Projectwise == 'year':
             if incomeres:
@@ -1155,7 +1158,11 @@ class ProfitLossCustomReport(models.TransientModel):
         worksheet.write(row,0, 'Total Income', style = mainheader)
         worksheet.write(row,1, '', style = mainheaderline)
         worksheet.write(row,2, abs(TotalIncome), style = mainheaderline )
-        worksheet.write(row,3, round((TotalIncome * 100 / OperatingIncome),1), style = mainheaderline)
+        if OperatingIncome == 0:
+            worksheet.write(row,3, round((0.0),1), style = mainheaderline)
+        else:
+            worksheet.write(row,3, round((TotalIncome * 100 / OperatingIncome),1), style = mainheaderline)
+
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             for i in range(0, len(finalincome_list)):
@@ -1170,7 +1177,10 @@ class ProfitLossCustomReport(models.TransientModel):
         else :
             worksheet.write(row,2, '', style = mainheaderline)
         if NetProfit < 0:
-            worksheet.write(row,3, round((NetProfit * 100 / OperatingIncome),1), style = mainheaderline)
+            if OperatingIncome == 0:
+                worksheet.write(row,3, round((0.0),1), style = mainheaderline)
+            else:
+                worksheet.write(row,3, round((NetProfit * 100 / OperatingIncome),1), style = mainheaderline)
         else:
             worksheet.write(row,3, '', style = mainheaderline)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
@@ -1205,16 +1215,20 @@ class ProfitLossCustomReport(models.TransientModel):
               break
 
         third_expense_list = []
-
+        
         for k in range(0,len(new_list)):
-            if  new_list[k]['account_type'] == "Expenses":
+            if new_list[k]['account_type'] == "Expenses":
                 row+=1
                 try:
-                    percentage = (new_list[k]['balance'] * 100 / OperatingIncome)
                     worksheet.write(row, 0, new_list[k]['account_code'],alinedata)
                     worksheet.write(row, 1, new_list[k]['account_name'],alinedata)
-                    worksheet.write(row, 2, new_list[k]['balance'],floatstyle)
+                    worksheet.write(row, 2, abs(new_list[k]['balance']),floatstyle)
+                    if OperatingIncome == 0 :
+                        percentage = round(((new_list[k]['balance'] * 100) / 100),1)
+                    else:
+                        percentage = round(((new_list[k]['balance'] * 100) / OperatingIncome),1)
                     worksheet.write(row, 3, abs(percentage),floatstyle)
+
                     if Projectwise == 'dimension':
                         mainlist_position={}
                         for main_data in range(len(main_list)):
@@ -1274,6 +1288,7 @@ class ProfitLossCustomReport(models.TransientModel):
                     resexpense.append(tmp)
         
         row+=1
+        worksheet.write(row,0,style = mainheaders)
         worksheet.write(row,1, 'Total Expenses', style = mainheaders)
         worksheet.write(row,2, Expenses, style = mainheaderdata )
         worksheet.write(row,3, round((ExpensePercentage),1), style = mainheaderdatas)
@@ -1305,10 +1320,13 @@ class ProfitLossCustomReport(models.TransientModel):
             if new_list[k]['account_type'] == "Depreciation":
                 row+=1
                 try:
-                    percentage = (new_list[k]['balance'] * 100 / OperatingIncome)
                     worksheet.write(row, 0, new_list[k]['account_code'],alinedata)
                     worksheet.write(row, 1, new_list[k]['account_name'],alinedata)
                     worksheet.write(row, 2, new_list[k]['balance'],floatstyle)
+                    if OperatingIncome == 0 :
+                        percentage = round(((new_list[k]['balance'] * 100) / 100),1)
+                    else:
+                        percentage = round(((new_list[k]['balance'] * 100) / OperatingIncome),1)
                     worksheet.write(row, 3, abs(percentage),floatstyle)
                     if Projectwise == 'dimension':
                         mainlist_position={}
@@ -1388,7 +1406,10 @@ class ProfitLossCustomReport(models.TransientModel):
         worksheet.write(row,0, 'Total Expenses', style = mainheader)
         worksheet.write(row,1, '', style = mainheaderline)
         worksheet.write(row,2, TotalExpenses, style = mainheaderline)
-        worksheet.write(row,3, round((TotalExpenses*100/OperatingIncome),1),  style = mainheaderline)
+        if OperatingIncome == 0:
+            worksheet.write(row,3, round((0.0),1), style = mainheaderline)
+        else:
+            worksheet.write(row,3, round((TotalExpenses*100/OperatingIncome),1),  style = mainheaderline)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
             col = 4
             for i in range(0,len(finalexpense_list)):
@@ -1403,7 +1424,10 @@ class ProfitLossCustomReport(models.TransientModel):
         else :
             worksheet.write(row,2, '', style = netmainheader)
         if NetProfit > 0:
-            worksheet.write(row,3, round((NetProfit*100/OperatingIncome),1) , style = netmainheader)
+            if OperatingIncome == 0:
+                worksheet.write(row,3, round((0.0),1), style = mainheaderline)
+            else:
+                worksheet.write(row,3, round((NetProfit*100/OperatingIncome),1) , style = netmainheader)
         else:
             worksheet.write(row,3, '', style = netmainheader)
         if Projectwise == 'dimension' or Projectwise == 'month' or Projectwise == 'year':
