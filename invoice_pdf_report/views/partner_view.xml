@@ -2,16 +2,16 @@
 <odoo>
     <data>
 
-        <record id="view_partner_property_form_inherit_income" model="ir.ui.view">
-            <field name="name">res.partner.property.form.inherit.income</field>
-            <field name="model">res.partner</field>
-            <field name="inherit_id" ref="account.view_partner_property_form"/>
-            <field name="arch" type="xml">
-                <field name="property_account_payable_id" position="after">
-                    <field name="income_account"/>
-                </field>
-            </field>
-        </record>
+<!--        <record id="view_partner_property_form_inherit_income" model="ir.ui.view">-->
+<!--            <field name="name">res.partner.property.form.inherit.income</field>-->
+<!--            <field name="model">res.partner</field>-->
+<!--            <field name="inherit_id" ref="account.view_partner_property_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <field name="property_account_payable_id" position="after">-->
+<!--                    <field name="income_account"/>-->
+<!--                </field>-->
+<!--            </field>-->
+<!--        </record>-->
 
     </data>
 </odoo>
