@@ -5,12 +5,11 @@
 # See LICENSE file for full copyright and licensing details.                 #
 #                                                                            #
 ##############################################################################
-# from odoo import models, fields, api, _
+from odoo import models, fields, api, _
 
-#
-#
-# class ResCompany(models.Model):
-#     _inherit = "res.partner"
-#
-#
-#     income_account = fields.Many2one('account.account', string="Income Account")
+
+class ResCompany(models.Model):
+    _inherit = "res.partner"
+
+
+    income_account = fields.Many2one('account.account', string="Income Account")
