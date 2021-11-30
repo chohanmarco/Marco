@@ -24,7 +24,7 @@ class AccountMove(models.Model):
         convert_amount_in_words = self.currency_id.amount_to_text(amount)
         convert_amount_in_words = convert_amount_in_words.replace('And', '')
         convert_amount_in_words = convert_amount_in_words.replace('Riyal', 'Saudi Riyals')
-        convert_amount_in_words = convert_amount_in_words.replace('Dollars', 'US Dollars')
+        # convert_amount_in_words = convert_amount_in_words.replace('Dollars', 'US Dollars')
         return convert_amount_in_words
 
 

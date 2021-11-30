@@ -8,7 +8,7 @@
 
 {
     'name': 'Invoice PDF Report',
-    'version': '13.1.1.1',
+    'version': '13.1.1.2',
     'summary': 'Invoice PDF Custom Report',
     'category': '',
     'description': """
