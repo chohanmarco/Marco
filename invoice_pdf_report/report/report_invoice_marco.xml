@@ -194,9 +194,9 @@
                             <td colspan="3" style="font-size:14px;padding:10px;">
                                 <strong>Only</strong>
                                 <strong t-esc="o.amount_to_text(o.amount_total, o.company_id.currency_id)"></strong>
-<!--                                <br></br>-->
-<!--                                <strong>فقط</strong>-->
-<!--                                <strong t-esc="o.invoice_amount_in_words('ar_001', o.amount_total)"></strong>-->
+                                <br></br>
+                                <strong>فقط</strong>
+                                <strong t-esc="o.invoice_amount_in_words('ar_001', o.amount_total)"></strong>
                             </td>
                             <td><span></span></td>
                             <td><span></span></td>
