@@ -27,15 +27,15 @@ class AccountMove(models.Model):
         convert_amount_in_words = convert_amount_in_words.replace('Dollars', 'US Dollars')
         return convert_amount_in_words
 
-    def invoice_amount_in_words(self, lang, amount):
-        convert_amount_in_words_arabic = self.currency_id.with_context(lang='ar_001').amount_to_text(amount)
-        convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Riyal', 'Saudi Riyals')
-        convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Dollars', 'US Dollars')
-        convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Saudi Riyals', 'ريال سعودي')
-        convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Halala', 'هللة')
-        convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('US Dollars', 'دولار أمريكي')
-        convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Cents', 'هللة')
-        return convert_amount_in_words_arabic
+    # def invoice_amount_in_words(self, lang, amount):
+    #     convert_amount_in_words_arabic = self.currency_id.with_context(lang='ar_001').amount_to_text(amount)
+    #     convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Riyal', 'Saudi Riyals')
+    #     convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Dollars', 'US Dollars')
+    #     convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Saudi Riyals', 'ريال سعودي')
+    #     convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Halala', 'هللة')
+    #     convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('US Dollars', 'دولار أمريكي')
+    #     convert_amount_in_words_arabic = convert_amount_in_words_arabic.replace('Cents', 'هللة')
+    #     return convert_amount_in_words_arabic
 
 
 class AccountMoveLine(models.Model):
