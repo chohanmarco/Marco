@@ -5,5 +5,4 @@
 # See LICENSE file for full copyright and licensing details.                 #
 #                                                                            #
 ##############################################################################
-from . import account_move_custom
-from . import res_company
+from . import models

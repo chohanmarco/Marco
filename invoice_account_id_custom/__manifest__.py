@@ -7,20 +7,18 @@
 ##############################################################################
 
 {
-    'name': 'Invoice PDF Report',
+    'name': 'Invoice Account ID Customization',
     'version': '13.0.1.0',
-    'summary': 'Invoice PDF Custom Report',
+    'summary': 'Invoice Account Customization',
     'category': '',
     'description': """
-        This module adds PDF custom report for invoice
+        This module selects Account ID Based on Set in Income Account field in Partner
     """,
     'author': 'Caret IT Solutions Pvt. Ltd.',
     'website': 'http://www.caretit.com',
     'depends': ['account'],
     'data': [
-        'report/report_invoice_marco.xml',
-        'views/account_move_custom_view.xml',
-        'views/res_company_view.xml',
+        'views/partner_view.xml',
     ],
     'qweb': [],
     'installable': True,
